@@ -127,6 +127,8 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
         .catch(() => { })
     })
 
+    this._ffmpegStream.run()
+
     console.log('!!started')
   }
 
