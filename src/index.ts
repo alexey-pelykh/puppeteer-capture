@@ -1,0 +1,5 @@
+export { capture } from "./capture"
+export { MissingHeadlessExperimentalRequiredArgs as MissingRequiredArgs } from "./MissingHeadlessExperimentalRequiredArgs"
+export { PuppeteerCapture } from "./PuppeteerCapture"
+export { PuppeteerCaptureOptions } from "./PuppeteerCaptureOptions"
+export { PuppeteerCaptureViaHeadlessExperimental } from "./PuppeteerCaptureViaHeadlessExperimental"

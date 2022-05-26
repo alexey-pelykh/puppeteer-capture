@@ -1,0 +1,49 @@
+{
+  "name": "puppeteer-capture",
+  "version": "1.0.0",
+  "description": "A Puppeteer plugin for capturing page as a video.",
+  "scripts": {
+    "build": "rimraf ./lib && tsc",
+    "test": "jest",
+    "lint": "ts-standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexey-pelykh/puppeteer-capture.git"
+  },
+  "author": {
+    "name": "Alexey Pelykh",
+    "email": "alexey.pelykh@gmail.com",
+    "url": "https://github.com/alexey-pelykh"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexey-pelykh/puppeteer-capture/issues"
+  },
+  "homepage": "https://github.com/alexey-pelykh/puppeteer-capture#readme",
+  "keywords": [
+    "puppeteer",
+    "page",
+    "screen",
+    "record",
+    "capture"
+  ],
+  "peerDependencies": {
+    "puppeteer": "^14.1.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.5.1",
+    "@types/puppeteer": "^5.4.6",
+    "jest": "^28.1.0",
+    "puppeteer": "^14.1.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^28.0.3",
+    "ts-standard": "^11.0.0",
+    "typescript": "^4.6.4"
+  },
+  "files": [
+    "lib/**/*",
+    "LICENSE",
+    "README.md"
+  ]
+}
