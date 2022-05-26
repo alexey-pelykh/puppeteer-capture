@@ -2,8 +2,6 @@ import puppeteer from 'puppeteer'
 import { PassThrough } from 'stream'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
-jest.useFakeTimers()
-
 let browser: puppeteer.Browser
 afterEach(async () => {
     if (browser) {
@@ -53,6 +51,7 @@ test('that capture works in headless mode', async () => {
     })
     await page.goto('https://google.com')
     await capture.start(stream)
+    await page.waitForTimeout(32)
     await capture.stop()
     return promise
 })

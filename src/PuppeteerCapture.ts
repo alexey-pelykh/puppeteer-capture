@@ -7,4 +7,5 @@ export interface PuppeteerCapture {
   captureTimestamp: number
   start: (target: string | Writable) => Promise<void>
   stop: () => Promise<void>
+  waitForTimeout: (milliseconds: number) => Promise<void>
 }

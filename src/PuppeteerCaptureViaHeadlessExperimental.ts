@@ -45,6 +45,11 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
       throw new Error('No session available')
     }
 
+    this._frameCaptured = new Promise<void>((resolve, reject) => {
+      this._frameCapturedResolve = resolve
+      this._frameCapturedReject = reject
+    })
+
     this._frameBeingCaptured = this._session.send('HeadlessExperimental.beginFrame', {
       frameTimeTicks: this._captureTimestamp,
       interval: this._frameInterval,
