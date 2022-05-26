@@ -6,12 +6,12 @@ import which from 'which'
 import ffmpeg, { setFfmpegPath, FfmpegCommand } from 'fluent-ffmpeg'
 import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 import { PuppeteerCapture } from './PuppeteerCapture'
-import { MP4_H264 } from './PuppeteerCaptureFormat'
+import { MP4 } from './PuppeteerCaptureFormat'
 
 export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
   public static DEFAULT_OPTIONS: PuppeteerCaptureOptions = {
     fps: 60,
-    format: MP4_H264()
+    format: MP4()
   }
 
   protected readonly _page: puppeteer.Page
@@ -25,6 +25,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
   protected _captureError: any | null
   protected _framesStream: PassThrough | null
   protected _ffmpegStream: FfmpegCommand | null
+  protected _ffmpegStarted: Promise<void> | null
   protected _ffmpegExited: Promise<void> | null
   protected _isCapturing: boolean
 
@@ -49,6 +50,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     this._captureError = null
     this._framesStream = null
     this._ffmpegStream = null
+    this._ffmpegStarted = null
     this._ffmpegExited = null
     this._isCapturing = false
   }
@@ -92,8 +94,6 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     ffmpegStream
       .output(target)
     await this._options.format!(ffmpegStream) // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    ffmpegStream
-      .outputOption('-movflags +frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov')
     if (this._options.customFfmpegConfig != null) {
       await this._options.customFfmpegConfig(ffmpegStream)
     }
@@ -107,6 +107,15 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     this._captureError = null
     this._framesStream = framesStream
     this._ffmpegStream = ffmpegStream
+    this._ffmpegStarted = new Promise((resolve, reject) => {
+      ffmpegStream
+        .on('start', () => {
+          resolve()
+        })
+        .on('error', (err, stdout, stderr) => {
+          reject(err)
+        })
+    })
     this._ffmpegExited = new Promise((resolve, reject) => {
       ffmpegStream
         .on('error', (err, stdout, stderr) => {
@@ -130,6 +139,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     })
 
     this._ffmpegStream.run()
+    await this._ffmpegStarted
   }
 
   public async stop (): Promise<void> {
@@ -149,6 +159,11 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
       await this._frameBeingCaptured
     }
 
+    if (this._ffmpegStarted != null) {
+      await this._ffmpegStarted
+      this._ffmpegStarted = null
+    }
+
     if (this._framesStream != null) {
       this._framesStream.end()
       this._framesStream = null
@@ -156,6 +171,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
 
     if (this._ffmpegExited != null) {
       await this._ffmpegExited
+      this._ffmpegExited = null
     }
 
     if (this._ffmpegStream != null) {
