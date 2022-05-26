@@ -45,14 +45,14 @@ test("that capture works in headless mode", async () => {
     const capture = new PuppeteerCaptureViaHeadlessExperimental(page)
     const stream = new PassThrough()
     const promise = new Promise((resolve, reject) => {
+        let dataSize = 0
         stream
-            .on("data", (_) => {})
-            .on("end", resolve)
+            .on("data", (chunk) => { dataSize += chunk.length })
+            .on("end", () => { dataSize ? resolve(dataSize) : reject() })
             .on("error", reject)
     })
     await page.goto("https://google.com")
     await capture.start(stream)
-    await page.waitForTimeout(1)
     await capture.stop()
     return promise
 })

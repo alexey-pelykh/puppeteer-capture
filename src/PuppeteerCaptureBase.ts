@@ -1,7 +1,6 @@
 import puppeteer from 'puppeteer'
-import { cpus } from 'os'
 import { mkdir } from 'fs/promises'
-import { PassThrough } from 'stream'
+import { PassThrough, Writable } from 'stream'
 import { dirname } from 'path'
 import which from 'which'
 import ffmpeg, { setFfmpegPath, FfmpegCommand } from 'fluent-ffmpeg'
@@ -19,13 +18,14 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
   protected readonly _options: PuppeteerCaptureOptions
   protected readonly _frameInterval: number
   protected readonly _captureFrame: Function
-  protected _target: string | NodeJS.WritableStream | null
+  protected _target: string | Writable | null
   protected _session: puppeteer.CDPSession | null
   protected _frameBeingCaptured: Promise<void> | null
   protected _captureTimestamp: number
   protected _captureError: any | null
   protected _framesStream: PassThrough | null
   protected _ffmpegStream: FfmpegCommand | null
+  protected _ffmpegExited: Promise<void> | null
   protected _isCapturing: boolean
 
   public constructor (page: puppeteer.Page, options?: PuppeteerCaptureOptions) {
@@ -49,6 +49,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     this._captureError = null
     this._framesStream = null
     this._ffmpegStream = null
+    this._ffmpegExited = null
     this._isCapturing = false
   }
 
@@ -64,7 +65,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     return this._captureTimestamp
   }
 
-  public async start (target: string | NodeJS.WritableStream): Promise<void> {
+  public async start (target: string | Writable): Promise<void> {
     if (this._isCapturing) {
       throw new Error('Capture is in progress')
     }
@@ -83,10 +84,13 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
       ? this._options.ffmpeg
       : await PuppeteerCaptureBase.findFfmpeg()
     )
-    const ffmpegStream = ffmpeg({ source: framesStream, priority: 20 })
+    const ffmpegStream = ffmpeg()
+    ffmpegStream
+      .input(framesStream)
       .inputFormat('image2pipe')
       .inputFPS(this._options.fps!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      .outputOptions(`-threads ${Math.min(1, cpus().length)}`)
+    ffmpegStream
+      .output(target)
     await this._options.format!(ffmpegStream) // eslint-disable-line @typescript-eslint/no-non-null-assertion
     if (this._options.customFfmpegConfig != null) {
       await this._options.customFfmpegConfig(ffmpegStream)
@@ -95,12 +99,22 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     const session = await this._page.target().createCDPSession()
     await this.configureSession(session)
 
+    console.log('!!start')
+
     this._target = target
     this._session = session
     this._captureTimestamp = 0
     this._captureError = null
     this._framesStream = framesStream
     this._ffmpegStream = ffmpegStream
+    this._ffmpegExited = new Promise((resolve, reject) => {
+      ffmpegStream
+        .on('start', (commandLine: string) => {
+          console.log('Spawned Ffmpeg with command: ' + commandLine)
+        })
+        .on('error', reject)
+        .on('end', resolve)
+    })
     this._isCapturing = true
     await this.captureFrame()
 
@@ -109,9 +123,13 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
         .then(() => { })
         .catch(() => { })
     })
+
+    console.log('!!started')
   }
 
   public async stop (): Promise<void> {
+    console.log('!!stop')
+
     if (this._captureError != null) {
       const captureError = this._captureError
       this._captureError = null
@@ -129,8 +147,15 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     }
 
     if (this._framesStream != null) {
+      console.log('END FRAMES STREAM')
       this._framesStream.end()
       this._framesStream = null
+    }
+
+    if (this._ffmpegExited != null) {
+      console.log('waiting for ffmpeg')
+      await this._ffmpegExited
+      console.log('done waiting for ffmpeg')
     }
 
     if (this._ffmpegStream != null) {
@@ -145,6 +170,8 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     if (this._target != null) {
       this._target = null
     }
+
+    console.log('!!stoped')
   }
 
   protected abstract configureSession (session: puppeteer.CDPSession): Promise<void>
@@ -152,6 +179,8 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
   protected abstract captureFrame (): Promise<void>
 
   protected async onFrameCaptured (timestamp: number, data: Buffer): Promise<void> {
+    console.log('!!FRAME')
+
     this._framesStream?.write(data)
   }
 
@@ -163,6 +192,9 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
   protected async onPageClose (): Promise<void> {
     await this.stop()
     this._captureError = new Error('Page was closed')
+  }
+
+  protected async onOutputEnd (): Promise<void> {
   }
 
   private static async findFfmpeg (): Promise<string> {
