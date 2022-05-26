@@ -11,12 +11,12 @@ const { capture } = require("puppeteer-capture");
 (async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  const capture = await capture(page);
-  await capture.start("capture.mp4");
+  const recorder = await capture(page);
+  await recorder.start("capture.mp4");
   await page.goto("https://google.com", {
     waitUntil: "networkidle0",
   });
-  await capture.stop();
+  await recorder.stop();
   await browser.close();
 })();
 ```

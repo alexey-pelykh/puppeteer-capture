@@ -6,7 +6,7 @@
     "build": "rimraf ./lib && tsc",
     "test": "jest",
     "lint": "ts-standard",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run lint"
   },
   "repository": {
