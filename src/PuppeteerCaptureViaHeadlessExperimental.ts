@@ -55,7 +55,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
         this._frameBeingCaptured = null
 
         if (dataBase64 == null) {
-          await this.onFrameCaptureError(new Error('No screenshot data captured'))
+          setTimeout(this._captureFrame, 0)
           return
         }
 
