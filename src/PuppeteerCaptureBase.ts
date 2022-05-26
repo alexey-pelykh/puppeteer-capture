@@ -6,12 +6,12 @@ import which from 'which'
 import ffmpeg, { setFfmpegPath, FfmpegCommand } from 'fluent-ffmpeg'
 import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 import { PuppeteerCapture } from './PuppeteerCapture'
-import { h264 } from './PuppeteerCaptureFormat'
+import { MP4_H264 } from './PuppeteerCaptureFormat'
 
 export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
   public static DEFAULT_OPTIONS: PuppeteerCaptureOptions = {
     fps: 60,
-    format: h264()
+    format: MP4_H264()
   }
 
   protected readonly _page: puppeteer.Page
@@ -92,14 +92,14 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     ffmpegStream
       .output(target)
     await this._options.format!(ffmpegStream) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    ffmpegStream
+      .outputOption('-movflags +frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov')
     if (this._options.customFfmpegConfig != null) {
       await this._options.customFfmpegConfig(ffmpegStream)
     }
 
     const session = await this._page.target().createCDPSession()
     await this.configureSession(session)
-
-    console.log('!!start')
 
     this._target = target
     this._session = session
@@ -117,6 +117,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
         })
         .on('error', reject)
         .on('end', resolve)
+      // TODO: ^ refine
     })
     this._isCapturing = true
     await this.captureFrame()
@@ -128,13 +129,9 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     })
 
     this._ffmpegStream.run()
-
-    console.log('!!started')
   }
 
   public async stop (): Promise<void> {
-    console.log('!!stop')
-
     if (this._captureError != null) {
       const captureError = this._captureError
       this._captureError = null
@@ -152,7 +149,6 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     }
 
     if (this._framesStream != null) {
-      console.log('END FRAMES STREAM')
       this._framesStream.end()
       this._framesStream = null
     }
@@ -207,7 +203,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
       return process.env.FFMPEG
     }
 
-    const systemFfmpeg = await which('node')
+    const systemFfmpeg = await which('ffmpeg')
     if (systemFfmpeg != null) {
       return systemFfmpeg
     }
