@@ -1,5 +1,6 @@
-import * as puppeteer from "puppeteer";
-import { PuppeteerCaptureViaHeadlessExperimental } from "./PuppeteerCaptureViaHeadlessExperimental";
+import puppeteer from 'puppeteer'
+import { PassThrough } from "stream"
+import { PuppeteerCaptureViaHeadlessExperimental } from "./PuppeteerCaptureViaHeadlessExperimental"
 
 jest.useFakeTimers()
 
@@ -32,21 +33,29 @@ test("that capture does not fail if required args are present", async () => {
     new PuppeteerCaptureViaHeadlessExperimental(page)
 })
 
-// test("that capture works in headless mode", async () => {
-//     browser = await puppeteer.launch({
-//         headless: true,
-//         args: [
-//             "--no-sandbox", // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
-//             ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
-//         ],
-//     })
-//     const page = await browser.newPage()
-//     const capture = new PuppeteerCaptureViaHeadlessExperimental(page)
-//     await page.goto("https://google.com")
-//     await capture.start("output.mp4")
-//     await page.waitForTimeout(1)
-//     await capture.stop()
-// })
+test("that capture works in headless mode", async () => {
+    browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            "--no-sandbox", // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
+            ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
+        ],
+    })
+    const page = await browser.newPage()
+    const capture = new PuppeteerCaptureViaHeadlessExperimental(page)
+    const stream = new PassThrough()
+    const promise = new Promise((resolve, reject) => {
+        stream
+            .on("data", (_) => {})
+            .on("end", resolve)
+            .on("error", reject)
+    })
+    await page.goto("https://google.com")
+    await capture.start(stream)
+    await page.waitForTimeout(1)
+    await capture.stop()
+    return promise
+})
 
 // test("that 1s at 25 FPS capture emits 25 frames", async () => {
 //     const browser = await puppeteer.launch({

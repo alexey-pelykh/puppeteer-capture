@@ -1,3 +1,9 @@
 {
-    "jest.jestCommandLine": "npm run test --"
+    "jest.jestCommandLine": "npm run test --",
+    "[javascript]": {
+      "editor.defaultFormatter": null
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": null
+    }
 }

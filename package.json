@@ -5,7 +5,9 @@
   "scripts": {
     "build": "rimraf ./lib && tsc",
     "test": "jest",
-    "lint": "ts-standard"
+    "lint": "ts-standard",
+    "prepublish": "npm run build",
+    "prepublishOnly": "npm run lint"
   },
   "repository": {
     "type": "git",
@@ -25,15 +27,31 @@
     "puppeteer",
     "page",
     "screen",
+    "video",
     "record",
-    "capture"
+    "capture",
+    "screen capture",
+    "screen recorder",
+    "page capture",
+    "page recorder",
+    "video capture",
+    "video recorder"
   ],
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.2",
+    "which": "^2.0.2"
+  },
+  "optionalDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+  },
   "peerDependencies": {
     "puppeteer": "^14.1.1"
   },
   "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.20",
     "@types/jest": "^27.5.1",
     "@types/puppeteer": "^5.4.6",
+    "@types/which": "^2.0.1",
     "jest": "^28.1.0",
     "puppeteer": "^14.1.1",
     "rimraf": "^3.0.2",

@@ -1,8 +1,9 @@
-import * as puppeteer from "puppeteer";
+import puppeteer from 'puppeteer'
 
 export interface PuppeteerCapture {
-    get page(): puppeteer.Page
-    get isCapturing(): boolean
-    start(filepath: string): Promise<void>
-    stop(): Promise<void>
+  page: puppeteer.Page
+  isCapturing: boolean
+  captureTimestamp: number
+  start: (target: string | NodeJS.WritableStream) => Promise<void>
+  stop: () => Promise<void>
 }
