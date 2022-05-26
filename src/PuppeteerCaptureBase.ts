@@ -112,6 +112,9 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
         .on('start', (commandLine: string) => {
           console.log('Spawned Ffmpeg with command: ' + commandLine)
         })
+        .on('stderr', (stderrLine: string) => {
+          console.log('Stderr output: ' + stderrLine);
+        })
         .on('error', reject)
         .on('end', resolve)
     })
