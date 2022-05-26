@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer'
-import { PassThrough } from "stream"
-import { PuppeteerCaptureViaHeadlessExperimental } from "./PuppeteerCaptureViaHeadlessExperimental"
+import { PassThrough } from 'stream'
+import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
 jest.useFakeTimers()
 
@@ -11,21 +11,21 @@ afterEach(async () => {
     }
 })
 
-test("that capture fails if required args are missing", async () => {
+test('that capture fails if required args are missing', async () => {
     browser = await puppeteer.launch({
         args: [
-            "--no-sandbox", // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
+            '--no-sandbox', // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
         ],
     })
     const page = await browser.newPage()
     expect(() => new PuppeteerCaptureViaHeadlessExperimental(page)).toThrow()
 })
 
-test("that capture does not fail if required args are present", async () => {
+test('that capture does not fail if required args are present', async () => {
     browser = await puppeteer.launch({
         headless: true,
         args: [
-            "--no-sandbox", // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
+            '--no-sandbox', // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
             ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
         ],
     })
@@ -33,11 +33,11 @@ test("that capture does not fail if required args are present", async () => {
     new PuppeteerCaptureViaHeadlessExperimental(page)
 })
 
-test("that capture works in headless mode", async () => {
+test('that capture works in headless mode', async () => {
     browser = await puppeteer.launch({
         headless: true,
         args: [
-            "--no-sandbox", // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
+            '--no-sandbox', // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
             ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
         ],
     })
@@ -47,29 +47,12 @@ test("that capture works in headless mode", async () => {
     const promise = new Promise((resolve, reject) => {
         let dataSize = 0
         stream
-            .on("data", (chunk) => { dataSize += chunk.length })
-            .on("end", () => { dataSize ? resolve(dataSize) : reject() })
-            .on("error", reject)
+            .on('data', (chunk) => { dataSize += chunk.length })
+            .on('end', () => { dataSize > 0 ? resolve(dataSize) : reject() })
+            .on('error', reject)
     })
-    await page.goto("https://google.com")
+    await page.goto('https://google.com')
     await capture.start(stream)
     await capture.stop()
     return promise
 })
-
-// test("that 1s at 25 FPS capture emits 25 frames", async () => {
-//     const browser = await puppeteer.launch({
-//         headless: true,
-//         args: [
-//             "--no-sandbox", // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
-//             ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
-//         ],
-//     })
-//     const page = await browser.newPage()
-//     const capture = new PuppeteerCaptureViaHeadlessExperimental(page, { fps: 25 })
-//     await page.goto("https://google.com")
-//     await capture.start("output.mp4")
-//     await page.waitForTimeout(1000)
-//     await capture.stop()
-//     await browser.close()
-// })
