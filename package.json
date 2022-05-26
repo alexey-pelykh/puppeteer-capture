@@ -37,7 +37,7 @@
     "video capture",
     "video recorder"
   ],
-  "main": "./src/index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "fluent-ffmpeg": "^2.1.2",
     "which": "^2.0.2"
