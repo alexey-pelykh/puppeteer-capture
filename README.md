@@ -53,16 +53,10 @@ await page.setViewport({
 ## Getting Started
 
 ```js
-const puppeteer = require('puppeteer')
-const { capture, PuppeteerCaptureViaHeadlessExperimental } = require('puppeteer-capture')
+const { capture, launch } = require('puppeteer-capture')
 
 (async () => {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
-    ],
-  })
+  const browser = await launch()
   const page = await browser.newPage()
   const recorder = await capture(page)
   await page.goto('https://google.com', {
