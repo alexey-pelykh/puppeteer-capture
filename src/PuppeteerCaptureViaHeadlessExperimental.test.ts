@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer'
 import { PassThrough } from 'stream'
+import { launch } from './launch'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
 let browser: puppeteer.Browser
@@ -21,7 +22,6 @@ test('that capture fails if required args are missing', async () => {
 
 test('that capture does not fail if required args are present', async () => {
     browser = await puppeteer.launch({
-        headless: true,
         args: [
             '--no-sandbox', // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
             ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
@@ -32,11 +32,9 @@ test('that capture does not fail if required args are present', async () => {
 })
 
 test('that capture works in headless mode', async () => {
-    browser = await puppeteer.launch({
-        headless: true,
+    browser = await launch({
         args: [
             '--no-sandbox', // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
-            ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
         ],
     })
     const page = await browser.newPage()
@@ -50,11 +48,9 @@ test('that capture works in headless mode', async () => {
 })
 
 test('that capture works with custom viewport size', async () => {
-    browser = await puppeteer.launch({
-        headless: true,
+    browser = await launch({
         args: [
             '--no-sandbox', // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
-            ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
         ],
     })
     const page = await browser.newPage()
