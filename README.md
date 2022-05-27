@@ -16,6 +16,12 @@ Unfortunately, [it is so](https://source.chromium.org/chromium/chromium/src/+/ma
 
 This relates to timers, animations, clicks, etc. To process interaction with the page, frame requests have to be submitted and thus capturing have to be active.
 
+## Setting `defaultViewport` causes rendering to freeze
+
+The exact origin of the issue is not yet known, yet it's likely to be related to the deterministic mode.
+
+Calling `page.setViewport()` before starting the capture behaves the same, yet calling it _after_ starting the capture works.
+
 ## Getting Started
 
 ```js
