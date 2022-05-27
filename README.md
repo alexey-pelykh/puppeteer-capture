@@ -14,7 +14,7 @@ Unfortunately, [it is so](https://source.chromium.org/chromium/chromium/src/+/ma
 
 ## No capturing == Nothing happens
 
-This relates to timers, animations, clicks, etc. To interact with the page, frame requests have to be submitted and thus - capturing have to be active.
+This relates to timers, animations, clicks, etc. To process interaction with the page, frame requests have to be submitted and thus capturing have to be active.
 
 ## Getting Started
 
@@ -38,5 +38,5 @@ const { capture, PuppeteerCaptureViaHeadlessExperimental } = require('puppeteer-
   await page.waitForTimeout(1000)
   await recorder.stop()
   await browser.close()
-})();
+})()
 ```
