@@ -107,6 +107,10 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
       .inputFPS(this._options.fps!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
     ffmpegStream
       .output(target)
+    if (this._options.size != null) {
+      ffmpegStream
+        .size(this._options.size)
+    }
     await this._options.format!(ffmpegStream) // eslint-disable-line @typescript-eslint/no-non-null-assertion
     if (this._options.customFfmpegConfig != null) {
       await this._options.customFfmpegConfig(ffmpegStream)
