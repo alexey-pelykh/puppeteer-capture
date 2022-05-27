@@ -168,6 +168,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._isCapturing = true
     await this.captureFrame()
 
+    // TODO: redo
     this._page.once('close', () => {
       this.onPageClose()
         .then(() => { })
@@ -304,7 +305,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._framesCaptured += 1
   }
 
-  protected async onFrameCaptureError (reason?: any): Promise<void> {
+  protected async onFrameCaptureFailed (reason?: any): Promise<void> {
     await this.stop()
     this._captureError = reason
     this.emit('frameCaptureFailed', reason)

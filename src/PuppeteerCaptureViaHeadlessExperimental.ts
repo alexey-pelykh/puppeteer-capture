@@ -70,7 +70,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
       async (reason) => {
         this._frameBeingCaptured = null
 
-        await this.onFrameCaptureError(reason)
+        await this.onFrameCaptureFailed(reason)
       }
     )
   }

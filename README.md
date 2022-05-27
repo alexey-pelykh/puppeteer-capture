@@ -68,3 +68,23 @@ const { capture, launch } = require('puppeteer-capture')
   await browser.close()
 })()
 ```
+
+## Events
+
+`PuppeteerCapture` supports following events:
+
+ - `captureStarted`: capture was successfully started
+ - `frameCaptured`: frame was captured
+ - `frameCaptureFailed`: frame capture failed
+ - `frameRecorded`: frame has been submitted to `ffmpeg`
+ - captureStopped: () => void`
+
+## Dependencies
+
+### `ffmpeg`
+
+It is resolved in the following order:
+
+1. `FFMPEG` environment variable, should point to the executable
+2. The executable that's available via the `PATH` environment variable
+3. Via `@ffmpeg-installer/ffmpeg`, if it's installed as dependency
