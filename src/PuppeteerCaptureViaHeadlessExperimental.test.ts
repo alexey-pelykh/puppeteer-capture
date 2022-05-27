@@ -133,6 +133,8 @@ test('that capture stops gracefully on page close', async () => {
   const stream = new PassThrough()
   await page.goto('https://google.com')
   await capture.start(stream)
-  page.close()
-  await expect(capture.stop()).rejects.toThrow()
+  await page.close()
+  await expect(async () => {
+    await capture.stop()
+  }).rejects.toThrow('Page was closed')
 })

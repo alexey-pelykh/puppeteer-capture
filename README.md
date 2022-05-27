@@ -76,6 +76,10 @@ The `Page.waitForTimeout()` method implementation essentially forwards the call 
 
 To workaround this issue, there's a `PuppeteerCapture.waitForTimeout()` that waits for the timeout in the timeline of the captured page, which is not real time at all. For convenience, while capturing is active, the page's `waitForTimeout()` becomes a wrapper for `PuppeteerCapture.waitForTimeout()`.
 
+## Multiple `start()`/`stop()` fail
+
+It's unclear why, yet after disabling and re-enabling the capture, callbacks from browser stop arriving.
+
 ## Events
 
 `PuppeteerCapture` supports following events:

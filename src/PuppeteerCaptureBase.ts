@@ -27,6 +27,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
   protected readonly _options: PuppeteerCaptureOptions
   protected readonly _frameInterval: number
   protected readonly _captureFrame: () => void
+  protected readonly _onPageClose: () => void
   protected readonly _startStopMutex: Mutex
   protected _target: string | Writable | null
   protected _session: puppeteer.CDPSession | null
@@ -60,6 +61,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     }
     this._frameInterval = 1000.0 / this._options.fps
     this._captureFrame = this.captureFrame.bind(this)
+    this._onPageClose = this.onPageClose.bind(this)
     this._startStopMutex = new Mutex()
     this._target = null
     this._session = null
@@ -206,12 +208,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._isCapturing = true
     await this.captureFrame()
 
-    // TODO: redo
-    this._page.once('close', () => {
-      this.onPageClose()
-        .then(() => { })
-        .catch(() => { })
-    })
+    this._page.once('close', this._onPageClose)
 
     this._ffmpegStream.run()
     await this._ffmpegStarted
@@ -298,6 +295,8 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
       this._page.waitForTimeout = this._pageWaitForTimeout
     }
 
+    this._page.off('close', this._onPageClose)
+
     this.emit('captureStopped')
   }
 
@@ -364,12 +363,11 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this.emit('frameCaptureFailed', reason)
   }
 
-  protected async onPageClose (): Promise<void> {
-    await this.stop()
+  protected onPageClose (): void {
     this._error = new Error('Page was closed')
-  }
-
-  protected async onOutputEnd (): Promise<void> {
+    this._startStopMutex.runExclusive(async () => await this._stop())
+      .then(() => { })
+      .catch(() => { })
   }
 
   private static async findFfmpeg (): Promise<string> {
