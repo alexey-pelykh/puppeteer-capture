@@ -45,7 +45,8 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
       throw new Error('No session available')
     }
 
-    this._frameCaptured = new Promise<void>((resolve, reject) => {
+    // TODO: not every fired due to no-data rescheduel
+    this._frameCaptured = new Promise<number>((resolve, reject) => {
       this._frameCapturedResolve = resolve
       this._frameCapturedReject = reject
     })
@@ -54,7 +55,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
       frameTimeTicks: this._captureTimestamp,
       interval: this._frameInterval,
       noDisplayUpdates: false,
-      screenshot: {}
+      screenshot: { format: 'png' }
     }).then(
       async ({ screenshotData: dataBase64 }) => {
         this._frameBeingCaptured = null

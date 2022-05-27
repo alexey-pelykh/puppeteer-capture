@@ -53,5 +53,6 @@ test('that capture works in headless mode', async () => {
     await capture.start(stream)
     await page.waitForTimeout(32)
     await capture.stop()
+    expect(capture.framesCaptured).toBeGreaterThan(1)
     return promise
 })

@@ -21,10 +21,11 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
   protected _target: string | Writable | null
   protected _session: puppeteer.CDPSession | null
   protected _frameBeingCaptured: Promise<void> | null
-  protected _frameCaptured: Promise<void> | null
-  protected _frameCapturedResolve: (() => void) | null
+  protected _frameCaptured: Promise<number> | null
+  protected _frameCapturedResolve: ((frameIndex: number) => void) | null
   protected _frameCapturedReject: ((reason?: any) => void) | null
   protected _captureTimestamp: number
+  protected _framesCaptured: number
   protected _captureError: any | null
   protected _framesStream: PassThrough | null
   protected _ffmpegStream: FfmpegCommand | null
@@ -54,6 +55,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     this._frameCapturedResolve = null
     this._frameCapturedReject = null
     this._captureTimestamp = 0
+    this._framesCaptured = 0
     this._captureError = null
     this._framesStream = null
     this._ffmpegStream = null
@@ -73,6 +75,10 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
 
   public get captureTimestamp (): number {
     return this._captureTimestamp
+  }
+
+  public get framesCaptured (): number {
+    return this._framesCaptured
   }
 
   public async start (target: string | Writable): Promise<void> {
@@ -112,6 +118,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     this._target = target
     this._session = session
     this._captureTimestamp = 0
+    this._framesCaptured = 0
     this._captureError = null
     this._framesStream = framesStream
     this._ffmpegStream = ffmpegStream
@@ -216,7 +223,7 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
     }
 
     const desiredCaptureTimestamp = this._captureTimestamp + milliseconds
-    let frameCaptured: Promise<void>
+    let frameCaptured: Promise<number>
     let waitPromiseResolve: () => void
     let waitPromiseReject: (reason?: any) => void
     const waitPromise = new Promise<void>((resolve, reject) => {
@@ -251,7 +258,8 @@ export abstract class PuppeteerCaptureBase implements PuppeteerCapture {
 
   protected async onFrameCaptured (timestamp: number, data: Buffer): Promise<void> {
     this._framesStream?.write(data)
-    this._frameCapturedResolve!() // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    this._frameCapturedResolve!(this._framesCaptured) // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    this._framesCaptured += 1
   }
 
   protected async onFrameCaptureError (reason?: any): Promise<void> {
