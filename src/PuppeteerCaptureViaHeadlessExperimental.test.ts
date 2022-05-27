@@ -42,17 +42,27 @@ test('that capture works in headless mode', async () => {
     const page = await browser.newPage()
     const capture = new PuppeteerCaptureViaHeadlessExperimental(page)
     const stream = new PassThrough()
-    const promise = new Promise((resolve, reject) => {
-        let dataSize = 0
-        stream
-            .on('data', (chunk) => { dataSize += chunk.length })
-            .on('end', () => { dataSize > 0 ? resolve(dataSize) : reject() })
-            .on('error', reject)
-    })
     await page.goto('https://google.com')
     await capture.start(stream)
     await page.waitForTimeout(32)
     await capture.stop()
     expect(capture.framesCaptured).toBeGreaterThan(1)
-    return promise
+})
+
+test('that capture works with custom viewport size', async () => {
+    browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox', // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
+            ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS,
+        ],
+    })
+    const page = await browser.newPage()
+    const capture = new PuppeteerCaptureViaHeadlessExperimental(page)
+    const stream = new PassThrough()
+    await page.goto('https://google.com')
+    await capture.start(stream)
+    await page.setViewport({ width: 1920, height: 1080 })
+    await capture.stop()
+    expect(capture.framesCaptured).toBeGreaterThan(1)
 })

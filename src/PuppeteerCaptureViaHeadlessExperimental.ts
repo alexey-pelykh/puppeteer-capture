@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer'
 import { MissingHeadlessExperimentalRequiredArgs } from './MissingHeadlessExperimentalRequiredArgs'
-import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 import { PuppeteerCaptureBase } from './PuppeteerCaptureBase'
+import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 
 export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBase {
   public static REQUIRED_ARGS = [
@@ -44,12 +44,6 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     if (this._session == null) {
       throw new Error('No session available')
     }
-
-    // TODO: not every fired due to no-data rescheduel
-    this._frameCaptured = new Promise<number>((resolve, reject) => {
-      this._frameCapturedResolve = resolve
-      this._frameCapturedReject = reject
-    })
 
     this._frameBeingCaptured = this._session.send('HeadlessExperimental.beginFrame', {
       frameTimeTicks: this._captureTimestamp,

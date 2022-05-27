@@ -22,12 +22,12 @@ The exact origin of the issue is not yet known, yet it's likely to be related to
 
 Calling `page.setViewport()` before starting the capture behaves the same, yet calling it _after_ starting the capture works yet not always. Thus it's safe to assume that there's some sort of race condition, since adding `page.waitForTimeout(100)` just before setting the viewport workarounds the issue.
 
-Also it should be taken into account that since frame size is going to change over the time of the recording, frame size autodetection will fail. To workaround this issue, frame size have to be specified when capture is being activated:
+Also it should be taken into account that since frame size is going to change over the time of the recording, frame size autodetection will fail. To workaround this issue, frame size have to be specified:
 ```js
-const recorder = await capture(page)
-await recorder.start('capture.mp4', {
+const recorder = await capture(page, {
   size: `${viewportWidth}x${viewportHeight}`,
 })
+await recorder.start('capture.mp4', { waitForTimeout: false })
 await page.waitForTimeout(100)
 await page.setViewport({
   width: viewportWidth,
@@ -36,6 +36,20 @@ await page.setViewport({
 })
 ```
 
+A friendlier workaround is enabled by default: `recorder.start()` automatically waits for the first frame to be captured.
+This approach seems to allow bypassing the alleged race condition:
+
+```js
+const recorder = await capture(page, {
+  size: `${viewportWidth}x${viewportHeight}`,
+})
+await recorder.start('capture.mp4')
+await page.setViewport({
+  width: viewportWidth,
+  height: viewportHeight,
+  deviceScaleFactor: 1.0,
+})
+```
 ## Getting Started
 
 ```js
