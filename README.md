@@ -70,6 +70,12 @@ await page.setViewport({
 })
 ```
 
+## `waitForTimeout()` won't work
+
+The `Page.waitForTimeout()` method implementation essentially forwards the call to the `Frame.waitForTimeout()` on the `page.mainFrame()`. The latter is implemented via `setTimeout()`, thus can not work in deterministic mode at all.
+
+To workaround this issue, there's a `PuppeteerCapture.waitForTimeout()` that waits for the timeout in the timeline of the captured page, which is not real time at all. For convenience, while capturing is active, the page's `waitForTimeout()` becomes a wrapper for `PuppeteerCapture.waitForTimeout()`.
+
 ## Events
 
 `PuppeteerCapture` supports following events:

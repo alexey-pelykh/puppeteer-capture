@@ -37,7 +37,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   }
 
   protected override async captureFrame (): Promise<void> {
-    if (!this._isCapturing || this._captureError != null) {
+    if (!this._isCapturing || this._error != null) {
       return
     }
 
@@ -53,6 +53,9 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     }).then(
       async ({ screenshotData: dataBase64 }) => {
         this._frameBeingCaptured = null
+        if (!this._isCapturing) {
+          return
+        }
 
         if (dataBase64 == null) {
           setTimeout(this._captureFrame, 0)
@@ -69,6 +72,9 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
       },
       async (reason) => {
         this._frameBeingCaptured = null
+        if (!this._isCapturing) {
+          return
+        }
 
         await this.onFrameCaptureFailed(reason)
       }

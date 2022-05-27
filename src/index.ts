@@ -7,4 +7,3 @@ export { PuppeteerCaptureEvents } from './PuppeteerCaptureEvents'
 export * as PuppeteerCaptureFormat from './PuppeteerCaptureFormat'
 export { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 export { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
-

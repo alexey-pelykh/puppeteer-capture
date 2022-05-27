@@ -39,6 +39,7 @@
   ],
   "main": "lib/index.js",
   "dependencies": {
+    "async-mutex": "^0.3.2",
     "fluent-ffmpeg": "^2.1.2",
     "which": "^2.0.2"
   },
