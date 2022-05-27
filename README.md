@@ -6,6 +6,25 @@ A Puppeteer plugin for capturing page as a video.
 
 [`HeadlessExperimental`](https://chromedevtools.github.io/devtools-protocol/tot/HeadlessExperimental/) is used to capture frames in a deterministic way. This approach allows to achieve better quality than using screencast.
 
+## Getting Started
+
+```js
+const { capture, launch } = require('puppeteer-capture')
+
+(async () => {
+  const browser = await launch()
+  const page = await browser.newPage()
+  const recorder = await capture(page)
+  await page.goto('https://google.com', {
+    waitUntil: 'networkidle0',
+  })
+  await recorder.start('capture.mp4')
+  await page.waitForTimeout(1000)
+  await recorder.stop()
+  await browser.close()
+})()
+```
+
 ## Known Issues
 
 ### MacOS is not supported
@@ -50,24 +69,6 @@ await page.setViewport({
   deviceScaleFactor: 1.0,
 })
 ```
-## Getting Started
-
-```js
-const { capture, launch } = require('puppeteer-capture')
-
-(async () => {
-  const browser = await launch()
-  const page = await browser.newPage()
-  const recorder = await capture(page)
-  await page.goto('https://google.com', {
-    waitUntil: 'networkidle0',
-  })
-  await recorder.start('capture.mp4')
-  await page.waitForTimeout(1000)
-  await recorder.stop()
-  await browser.close()
-})()
-```
 
 ## Events
 
@@ -77,7 +78,7 @@ const { capture, launch } = require('puppeteer-capture')
  - `frameCaptured`: frame was captured
  - `frameCaptureFailed`: frame capture failed
  - `frameRecorded`: frame has been submitted to `ffmpeg`
- - captureStopped: () => void`
+ - `captureStopped`: capture was stopped
 
 ## Dependencies
 
