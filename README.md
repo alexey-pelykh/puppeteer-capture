@@ -20,7 +20,7 @@ This relates to timers, animations, clicks, etc. To process interaction with the
 
 The exact origin of the issue is not yet known, yet it's likely to be related to the deterministic mode.
 
-Calling `page.setViewport()` before starting the capture behaves the same, yet calling it _after_ starting the capture works.
+Calling `page.setViewport()` before starting the capture behaves the same, yet calling it _after_ starting the capture works yet not always. Thus it's safe to assume that there's some sort of race condition, since adding `page.waitForTimeout(100)` just before setting the viewport workarounds the issue.
 
 ## Getting Started
 
