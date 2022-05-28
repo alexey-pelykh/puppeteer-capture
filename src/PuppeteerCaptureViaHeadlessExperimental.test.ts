@@ -3,7 +3,7 @@ import { PassThrough } from 'stream'
 import { launch } from './launch'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
-const PUPPETEER_LAUNCH_ARGS = process.getuid() !== 0
+const PUPPETEER_LAUNCH_ARGS = process.platform === 'win32' || process.getuid() !== 0
   ? []
   : [
       '--no-sandbox' // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
