@@ -1,6 +1,6 @@
 {
   "name": "puppeteer-capture",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "A Puppeteer plugin for capturing page as a video.",
   "scripts": {
     "build": "rimraf ./lib && tsc --project ./tsconfig.build.json",
