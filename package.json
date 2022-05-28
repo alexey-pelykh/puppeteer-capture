@@ -65,5 +65,9 @@
     "lib/**/*",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "engines": {
+    "npm": ">=7",
+    "node": ">=12"
+  }
 }

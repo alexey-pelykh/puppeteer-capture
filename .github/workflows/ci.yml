@@ -15,8 +15,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         node-version:
-          # - lts/dubnium
-          # - lts/erbium
+          - lts/erbium
           - lts/fermium
           - lts/gallium
     steps:
@@ -28,4 +27,3 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run test
-      - run: npm run build
