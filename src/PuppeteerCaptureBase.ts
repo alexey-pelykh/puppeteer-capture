@@ -28,6 +28,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
   protected readonly _frameInterval: number
   protected readonly _captureFrame: () => void
   protected readonly _onPageClose: () => void
+  protected readonly _onSessionDisconnected: () => void
   protected readonly _startStopMutex: Mutex
   protected _target: string | Writable | null
   protected _session: puppeteer.CDPSession | null
@@ -62,6 +63,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._frameInterval = 1000.0 / this._options.fps
     this._captureFrame = this.captureFrame.bind(this)
     this._onPageClose = this.onPageClose.bind(this)
+    this._onSessionDisconnected = this.onSessionDisconnected.bind(this)
     this._startStopMutex = new Mutex()
     this._target = null
     this._session = null
@@ -159,6 +161,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     }
 
     const session = await this._page.target().createCDPSession()
+    session.on('CDPSession.Disconnected', this._onSessionDisconnected)
     await this.configureSession(session)
 
     this._target = target
@@ -284,6 +287,10 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
 
     if (this._session != null) {
       await this.deconfigureSession(this._session)
+      this._session.off('CDPSession.Disconnected', this._onSessionDisconnected)
+      if (this._session.connection() != null) {
+        await this._session.detach()
+      }
       this._session = null
     }
 
@@ -365,6 +372,13 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
 
   protected onPageClose (): void {
     this._error = new Error('Page was closed')
+    this._startStopMutex.runExclusive(async () => await this._stop())
+      .then(() => { })
+      .catch(() => { })
+  }
+
+  protected onSessionDisconnected (): void {
+    this._error = new Error('Session was disconnected')
     this._startStopMutex.runExclusive(async () => await this._stop())
       .then(() => { })
       .catch(() => { })

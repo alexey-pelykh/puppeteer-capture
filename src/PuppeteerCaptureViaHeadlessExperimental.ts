@@ -31,7 +31,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   }
 
   protected override async deconfigureSession (session: puppeteer.CDPSession): Promise<void> {
-    if (!this._page.isClosed()) {
+    if (session.connection() != null) {
       await session.send('HeadlessExperimental.disable')
     }
   }
