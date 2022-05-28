@@ -1,5 +1,7 @@
 # puppeteer-capture
 
+[![NPM](https://nodei.co/npm/puppeteer-capture.png?downloads=true)](https://nodei.co/npm/puppeteer-capture/)
+
 A Puppeteer plugin for capturing page as a video.
 
 ## Under The Hood
