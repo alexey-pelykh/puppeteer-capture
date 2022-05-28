@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A Puppeteer plugin for capturing page as a video.",
   "scripts": {
-    "build": "rimraf ./lib && tsc",
+    "build": "rimraf ./lib && tsc --project ./tsconfig.build.json",
     "test": "jest",
     "lint": "ts-standard",
     "prepare": "npm run build",

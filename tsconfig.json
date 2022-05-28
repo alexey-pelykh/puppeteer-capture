@@ -1,12 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "./lib",
-    "strict": true,
-    "esModuleInterop": true
-  },
-  "include": ["src"],
-  "exclude": ["**/*.test.ts"]
+  "extends": "./tsconfig.base.json"
 }
