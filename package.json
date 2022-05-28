@@ -1,0 +1,73 @@
+{
+  "name": "puppeteer-capture",
+  "version": "0.0.0",
+  "description": "A Puppeteer plugin for capturing page as a video.",
+  "scripts": {
+    "build": "rimraf ./lib && tsc --project ./tsconfig.build.json",
+    "test": "jest",
+    "lint": "ts-standard",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexey-pelykh/puppeteer-capture.git"
+  },
+  "author": {
+    "name": "Alexey Pelykh",
+    "email": "alexey.pelykh@gmail.com",
+    "url": "https://github.com/alexey-pelykh"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexey-pelykh/puppeteer-capture/issues"
+  },
+  "homepage": "https://github.com/alexey-pelykh/puppeteer-capture#readme",
+  "keywords": [
+    "puppeteer",
+    "page",
+    "screen",
+    "video",
+    "record",
+    "capture",
+    "screen capture",
+    "screen recorder",
+    "page capture",
+    "page recorder",
+    "video capture",
+    "video recorder"
+  ],
+  "main": "lib/index.js",
+  "dependencies": {
+    "async-mutex": "^0.3.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "which": "^2.0.2"
+  },
+  "optionalDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+  },
+  "peerDependencies": {
+    "puppeteer": "^14.1.1"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.20",
+    "@types/jest": "^27.5.1",
+    "@types/puppeteer": "^5.4.6",
+    "@types/which": "^2.0.1",
+    "jest": "^28.1.0",
+    "puppeteer": "^14.1.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^28.0.3",
+    "ts-standard": "^11.0.0",
+    "typescript": "^4.6.4"
+  },
+  "files": [
+    "lib/**/*",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "npm": ">=7",
+    "node": ">=14"
+  }
+}

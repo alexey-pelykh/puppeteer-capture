@@ -1,3 +1,7 @@
+## Project-specific:
+/lib
+/output.mp4
+
 ## Origin: https://github.com/github/gitignore/blob/main/Node.gitignore
 # Logs
 logs
