@@ -375,10 +375,10 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
       return process.env.FFMPEG
     }
 
-    const systemFfmpeg = await which('ffmpeg')
-    if (systemFfmpeg != null) {
+    try {
+      const systemFfmpeg = await which('ffmpeg')
       return systemFfmpeg
-    }
+    } catch (e) { }
 
     try {
       const ffmpeg = require('@ffmpeg-installer/ffmpeg') // eslint-disable-line @typescript-eslint/no-var-requires
