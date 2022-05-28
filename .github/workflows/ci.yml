@@ -15,8 +15,8 @@ jobs:
           - ubuntu-latest
           - windows-latest
         node-version:
-          - lts/dubnium
-          - lts/erbium
+          # - lts/dubnium
+          # - lts/erbium
           - lts/fermium
           - lts/gallium
     steps:
