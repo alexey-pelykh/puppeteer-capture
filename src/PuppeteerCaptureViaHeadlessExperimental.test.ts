@@ -116,3 +116,16 @@ test('that capture stops gracefully on page close', async () => {
     await capture.stop()
   }).rejects.toThrow('Page was closed')
 })
+
+test('that capture stops gracefully on session connection drop', async () => {
+  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  const page = await browser.newPage()
+  const capture = new PuppeteerCaptureViaHeadlessExperimental(page)
+  const stream = new PassThrough()
+  await page.goto('https://google.com')
+  await capture.start(stream)
+  capture['_session']!.emit('CDPSession.Disconnected') // eslint-disable-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/dot-notation
+  await expect(async () => {
+    await capture.stop()
+  }).rejects.toThrow('Session was disconnected')
+})
