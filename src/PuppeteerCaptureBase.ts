@@ -13,25 +13,22 @@ import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 import { PuppeteerCaptureStartOptions } from './PuppeteerCaptureStartOptions'
 
 export abstract class PuppeteerCaptureBase extends EventEmitter implements PuppeteerCapture {
-  public static DEFAULT_OPTIONS: PuppeteerCaptureOptions = {
+  public static readonly DEFAULT_OPTIONS: PuppeteerCaptureOptions = {
     fps: 60,
     format: MP4()
   }
 
-  public static DEFAULT_START_OPTIONS: PuppeteerCaptureStartOptions = {
+  public static readonly DEFAULT_START_OPTIONS: PuppeteerCaptureStartOptions = {
     waitForFirstFrame: true,
     dropCapturedFrames: false
   }
 
-  protected readonly _page: puppeteer.Page
   protected readonly _options: PuppeteerCaptureOptions
   protected readonly _frameInterval: number
-  protected readonly _captureFrame: () => void
   protected readonly _onPageClose: () => void
-  protected readonly _onSessionDisconnected: () => void
   protected readonly _startStopMutex: Mutex
+  protected _page: puppeteer.Page | null
   protected _target: string | Writable | null
-  protected _session: puppeteer.CDPSession | null
   protected _frameBeingCaptured: Promise<void> | null
   protected _captureTimestamp: number
   protected _capturedFrames: number
@@ -46,10 +43,9 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
   protected _pageWaitForTimeout: ((milliseconds: number) => Promise<void>) | null
   protected _isCapturing: boolean
 
-  public constructor (page: puppeteer.Page, options?: PuppeteerCaptureOptions) {
+  public constructor (options?: PuppeteerCaptureOptions) {
     super()
 
-    this._page = page
     this._options = {
       ...PuppeteerCaptureBase.DEFAULT_OPTIONS,
       ...(options !== null ? options : {})
@@ -61,12 +57,11 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
       throw new Error(`options.fps can not be set to ${this._options.fps}`)
     }
     this._frameInterval = 1000.0 / this._options.fps
-    this._captureFrame = this.captureFrame.bind(this)
     this._onPageClose = this.onPageClose.bind(this)
-    this._onSessionDisconnected = this.onSessionDisconnected.bind(this)
     this._startStopMutex = new Mutex()
+
+    this._page = null
     this._target = null
-    this._session = null
     this._frameBeingCaptured = null
     this._captureTimestamp = 0
     this._capturedFrames = 0
@@ -82,7 +77,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._isCapturing = false
   }
 
-  public get page (): puppeteer.Page {
+  public get page (): puppeteer.Page | null {
     return this._page
   }
 
@@ -110,6 +105,32 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     return this._recordedFrames
   }
 
+  public async attach (page: puppeteer.Page): Promise<void> {
+    if (this._page != null) {
+      throw new Error('Already attached to a page')
+    }
+
+    await this._attach(page)
+
+    this._page = page
+  }
+
+  protected async _attach (page: puppeteer.Page): Promise<void> {
+  }
+
+  public async detach (): Promise<void> {
+    if (this._page == null) {
+      throw new Error('Already detached from a page')
+    }
+
+    await this._detach(this._page)
+
+    this._page = null
+  }
+
+  protected async _detach (page: puppeteer.Page): Promise<void> {
+  }
+
   public async start (target: string | Writable, options?: PuppeteerCaptureStartOptions): Promise<void> {
     await this._startStopMutex.runExclusive(async () => await this._start(target, options))
   }
@@ -124,6 +145,10 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     }
     if (options.waitForFirstFrame == null) {
       throw new Error('options.waitForFirstFrame can not be null or undefined')
+    }
+
+    if (this._page == null) {
+      throw new Error('Not attached to a page')
     }
 
     if (this._isCapturing) {
@@ -151,6 +176,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
       .inputFPS(this._options.fps!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
     ffmpegStream
       .output(target)
+      .outputFPS(this._options.fps!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
     if (this._options.size != null) {
       ffmpegStream
         .size(this._options.size)
@@ -160,12 +186,9 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
       await this._options.customFfmpegConfig(ffmpegStream)
     }
 
-    const session = await this._page.target().createCDPSession()
-    session.on('CDPSession.Disconnected', this._onSessionDisconnected)
-    await this.configureSession(session)
+    this._page.once('close', this._onPageClose)
 
     this._target = target
-    this._session = session
     this._captureTimestamp = 0
     this._capturedFrames = 0
     this._dropCapturedFrames = options.dropCapturedFrames! // eslint-disable-line @typescript-eslint/no-non-null-assertion
@@ -208,10 +231,6 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
         .once('error', onError)
         .once('end', onEnd)
     })
-    this._isCapturing = true
-    await this.captureFrame()
-
-    this._page.once('close', this._onPageClose)
 
     this._ffmpegStream.run()
     await this._ffmpegStarted
@@ -221,7 +240,10 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
       await this.waitForTimeout(milliseconds)
     }
 
+    this._isCapturing = true
     this.emit('captureStarted')
+
+    await this.onPostCaptureStarted()
 
     if (options.waitForFirstFrame) {
       await new Promise<void>((resolve, reject) => {
@@ -252,6 +274,10 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
   }
 
   protected async _stop (): Promise<void> {
+    if (this._page == null) {
+      throw new Error('Not attached to a page')
+    }
+
     if (!this._isCapturing) {
       throw new Error('Capture is not in progress')
     }
@@ -285,15 +311,6 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
       this._ffmpegStream = null
     }
 
-    if (this._session != null) {
-      await this.deconfigureSession(this._session)
-      this._session.off('CDPSession.Disconnected', this._onSessionDisconnected)
-      if (this._session.connection() != null) {
-        await this._session.detach()
-      }
-      this._session = null
-    }
-
     if (this._target != null) {
       this._target = null
     }
@@ -305,6 +322,8 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._page.off('close', this._onPageClose)
 
     this.emit('captureStopped')
+
+    await this.onPostCaptureStopped()
   }
 
   public async waitForTimeout (milliseconds: number): Promise<void> {
@@ -347,9 +366,11 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     return super.emit(eventName, ...args)
   }
 
-  protected abstract configureSession (session: puppeteer.CDPSession): Promise<void>
-  protected abstract deconfigureSession (session: puppeteer.CDPSession): Promise<void>
-  protected abstract captureFrame (): Promise<void>
+  protected async onPostCaptureStarted (): Promise<void> {
+  }
+
+  protected async onPostCaptureStopped (): Promise<void> {
+  }
 
   protected async onFrameCaptured (timestamp: number, data: Buffer): Promise<void> {
     this.emit('frameCaptured', this._capturedFrames, timestamp, data)
@@ -372,14 +393,12 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
 
   protected onPageClose (): void {
     this._error = new Error('Page was closed')
-    this._startStopMutex.runExclusive(async () => await this._stop())
-      .then(() => { })
-      .catch(() => { })
-  }
-
-  protected onSessionDisconnected (): void {
-    this._error = new Error('Session was disconnected')
-    this._startStopMutex.runExclusive(async () => await this._stop())
+    this._startStopMutex.runExclusive(async () => {
+      if (this._isCapturing) {
+        await this._stop()
+      }
+      await this.detach()
+    })
       .then(() => { })
       .catch(() => { })
   }
