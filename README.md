@@ -21,6 +21,7 @@ const { capture, launch } = require('puppeteer-capture')
   await recorder.start('capture.mp4')
   await page.waitForTimeout(1000)
   await recorder.stop()
+  await recorder.detach()
   await browser.close()
 })()
 ```
@@ -79,6 +80,23 @@ To workaround this issue, there's a `PuppeteerCapture.waitForTimeout()` that wai
 ## Multiple `start()`/`stop()` fail
 
 It's unclear why, yet after disabling and re-enabling the capture, callbacks from browser stop arriving.
+
+## Time-related functions are affected
+
+The following functions have to be overriden with injected versions:
+
+- `setTimeout` & `clearTimeout`
+- `setInterval` & `clearInterval`
+- `window.requestAnimationFrame` & `window.cancelAnimationFrame`
+- `Date()` & `Date.now()`
+- `performance.now()`
+
+The injection should happen before page content loads:
+
+```js
+const recorder = await capture(page) // Injection happens here during attach()
+await page.goto('https://google.com') // Possible capture would happen here, thus injected versions would be captured
+```
 
 ## Events
 
