@@ -3,5 +3,7 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)sx?$': 'ts-jest'
   },
-  moduleFileExtensions: [...defaults.moduleFileExtensions, 'ts', 'tsx']
+  moduleFileExtensions: [...defaults.moduleFileExtensions, 'ts', 'tsx'],
+  collectCoverage: true,
+  coverageReporters: ['lcov', 'html']
 }

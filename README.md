@@ -1,5 +1,11 @@
 # puppeteer-capture
 
+![node-current](https://img.shields.io/node/v/puppeteer-capture)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alexey-pelykh/puppeteer-capture/ci)
+![Codecov](https://img.shields.io/codecov/c/github/alexey-pelykh/puppeteer-capture)
+![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/alexey-pelykh/puppeteer-capture)
+[![GitHub license](https://img.shields.io/github/license/alexey-pelykh/puppeteer-capture)](https://github.com/alexey-pelykh/puppeteer-capture/blob/main/LICENSE)
+
 A Puppeteer plugin for capturing page as a video.
 
 ## Under The Hood
