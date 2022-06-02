@@ -4,7 +4,7 @@
   "description": "A Puppeteer plugin for capturing page as a video.",
   "scripts": {
     "build": "rimraf ./lib && tsc --project ./tsconfig.build.json",
-    "test": "jest",
+    "test": "jest --coverage",
     "lint": "ts-standard",
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint"
@@ -47,15 +47,15 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0"
   },
   "peerDependencies": {
-    "puppeteer": "^14.1.1"
+    "puppeteer": "^14.0.0"
   },
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.20",
-    "@types/jest": "^27.5.1",
+    "@types/jest": "^28.1.0",
     "@types/puppeteer": "^5.4.6",
     "@types/which": "^2.0.1",
     "jest": "^28.1.0",
-    "puppeteer": "^14.1.1",
+    "puppeteer": "^14.2.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^28.0.3",
     "ts-standard": "^11.0.0",
