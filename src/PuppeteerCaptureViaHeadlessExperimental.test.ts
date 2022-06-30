@@ -149,9 +149,9 @@ test('that capture is compatible with Date.now()', async () => {
   const stream = new PassThrough()
   await page.goto('about:blank')
   await capture.start(stream)
-  const beforeTimeout = await page.evaluate('Date.now()')
+  const beforeTimeout = await page.evaluate('Date.now()') as number
   await page.waitForTimeout(500)
-  const afterTimeout = await page.evaluate('Date.now()')
+  const afterTimeout = await page.evaluate('Date.now()') as number
   await capture.stop()
   expect(afterTimeout).toBeGreaterThan(beforeTimeout)
   const actualTimeout = afterTimeout - beforeTimeout
@@ -167,9 +167,9 @@ test('that capture is compatible with new Date().getTime()', async () => {
   const stream = new PassThrough()
   await page.goto('about:blank')
   await capture.start(stream)
-  const beforeTimeout = await page.evaluate('new Date().getTime()')
+  const beforeTimeout = await page.evaluate('new Date().getTime()') as number
   await page.waitForTimeout(500)
-  const afterTimeout = await page.evaluate('new Date().getTime()')
+  const afterTimeout = await page.evaluate('new Date().getTime()') as number
   await capture.stop()
   expect(afterTimeout).toBeGreaterThan(beforeTimeout)
   const actualTimeout = afterTimeout - beforeTimeout
@@ -185,9 +185,9 @@ test('that capture is compatible with performance.now()', async () => {
   const stream = new PassThrough()
   await page.goto('about:blank')
   await capture.start(stream)
-  const beforeTimeout = await page.evaluate('performance.now()')
+  const beforeTimeout = await page.evaluate('performance.now()') as number
   await page.waitForTimeout(500)
-  const afterTimeout = await page.evaluate('performance.now()')
+  const afterTimeout = await page.evaluate('performance.now()') as number
   await capture.stop()
   expect(afterTimeout).toBeGreaterThan(beforeTimeout)
   const actualTimeout = afterTimeout - beforeTimeout
@@ -357,7 +357,7 @@ test('that inactive capture is compatible with requestAnimationFrame()', async (
     requestAnimationFrame(tick);
   `)
   await page.waitForTimeout(500)
-  const [inactiveCaptureTicksCounter, inactiveActualTimeout] = await page.evaluate('[ticksCounter, timeout]')
+  const [inactiveCaptureTicksCounter, inactiveActualTimeout] = await page.evaluate('[ticksCounter, timeout]') as number[]
   expect(inactiveCaptureTicksCounter).toBeGreaterThan(0)
   expect(inactiveActualTimeout).toBeGreaterThan(0)
 
@@ -368,7 +368,7 @@ test('that inactive capture is compatible with requestAnimationFrame()', async (
     previousTimeout = null;
   `)
   await page.waitForTimeout(500)
-  const [activeCaptureTicksCounter, activeActualTimeout] = await page.evaluate('[ticksCounter, timeout]')
+  const [activeCaptureTicksCounter, activeActualTimeout] = await page.evaluate('[ticksCounter, timeout]') as number[]
   await capture.stop()
   expect(activeCaptureTicksCounter).toBeGreaterThan(0)
   expect(activeActualTimeout).toBeGreaterThan(0)
