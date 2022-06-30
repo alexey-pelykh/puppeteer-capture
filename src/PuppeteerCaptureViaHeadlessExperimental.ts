@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer'
+import { Protocol } from 'devtools-protocol'
 import { MissingHeadlessExperimentalRequiredArgs } from './MissingHeadlessExperimentalRequiredArgs'
 import { PuppeteerCaptureBase } from './PuppeteerCaptureBase'
 import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
@@ -39,7 +40,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   protected readonly _requestFrameCapture: () => void
   protected readonly _onSessionDisconnected: () => void
   protected _session: puppeteer.CDPSession | null
-  protected _onNewDocumentScript: puppeteer.Protocol.Page.ScriptIdentifier | null
+  protected _onNewDocumentScript: Protocol.Page.ScriptIdentifier | null
 
   public constructor (options?: PuppeteerCaptureOptions) {
     super(options)
@@ -58,13 +59,26 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     }
   }
 
+  protected getPageClient (page: puppeteer.Page): puppeteer.CDPSession {
+    // Before puppeteer 14.4.0, the internal method was client()
+    if ('client' in page) {
+      // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+      // @ts-ignore
+      return page.client()
+    }
+
+    // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore
+    return page._client()
+  }
+
   protected override async _attach (page: puppeteer.Page): Promise<void> {
     PuppeteerCaptureViaHeadlessExperimental.validateBrowserArgs(page.browser())
 
     const session = await page.target().createCDPSession()
 
     // NOTE: For some reason, page.client() has to be used instead of newly created session
-    const onNewDocumentScript = (await page.client().send('Page.addScriptToEvaluateOnNewDocument', {
+    const onNewDocumentScript = (await this.getPageClient(page).send('Page.addScriptToEvaluateOnNewDocument', {
       source: this._injector
     })).identifier
 
@@ -77,7 +91,9 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   protected override async _detach (page: puppeteer.Page): Promise<void> {
     if (this._onNewDocumentScript != null) {
       // NOTE: For details, see send('Page.addScriptToEvaluateOnNewDocument') code
-      await page.client().send('Page.removeScriptToEvaluateOnNewDocument', { identifier: this._onNewDocumentScript })
+      await this.getPageClient(page).send('Page.removeScriptToEvaluateOnNewDocument', {
+        identifier: this._onNewDocumentScript
+      })
       this._onNewDocumentScript = null
     }
 
@@ -152,7 +168,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   protected override async onPostCaptureStarted (): Promise<void> {
     const page = this._page
     const session = this._session
-    if (page?.client()?.connection() == null || session?.connection() == null) {
+    if (page == null || this.getPageClient(page)?.connection() == null || session?.connection() == null) {
       return
     }
 
@@ -169,7 +185,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   protected override async onPostCaptureStopped (): Promise<void> {
     const page = this._page
     const session = this._session
-    if (page?.client()?.connection() == null || session?.connection() == null) {
+    if (page == null || this.getPageClient(page)?.connection() == null || session?.connection() == null) {
       return
     }
 
