@@ -17,6 +17,33 @@ jobs:
         node-version:
           - lts/fermium
           - lts/gallium
+        puppeteer-version:
+          - '14.0'
+          - '14.1'
+          - '14.2'
+          - '14.3'
+          - '14.4'
+          - '15.0'
+          - '15.1'
+          - '15.2'
+          - '15.3'
+          - '15.4'
+          - '15.5'
+          - '16.0'
+          - '16.1'
+          - '16.2'
+          - '17.0'
+          - '17.1'
+          - '18.0'
+          - '18.1'
+          - '18.2'
+          - '19.0'
+          - '19.1'
+          - '19.2'
+          - '19.3'
+          - '19.4'
+    env:
+      PUPPETEER_CAPTURE__PUPPETEER_VERSION: -${{ matrix.puppeteer-version }}
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}

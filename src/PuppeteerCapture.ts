@@ -1,16 +1,16 @@
-import puppeteer from 'puppeteer'
+import type { Page as PuppeteerPage } from 'puppeteer'
 import { Writable } from 'stream'
 import { PuppeteerCaptureEvents } from './PuppeteerCaptureEvents'
 import { PuppeteerCaptureStartOptions } from './PuppeteerCaptureStartOptions'
 
 export interface PuppeteerCapture {
-  page: puppeteer.Page | null
+  page: PuppeteerPage | null
   isCapturing: boolean
   captureTimestamp: number
   capturedFrames: number
   dropCapturedFrames: boolean
   recordedFrames: number
-  attach: (page: puppeteer.Page) => Promise<void>
+  attach: (page: PuppeteerPage) => Promise<void>
   detach: () => Promise<void>
   start: (target: string | Writable, options?: PuppeteerCaptureStartOptions) => Promise<void>
   stop: () => Promise<void>
