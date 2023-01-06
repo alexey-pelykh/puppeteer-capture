@@ -3,7 +3,7 @@ import ffmpeg, { FfmpegCommand, setFfmpegPath } from 'fluent-ffmpeg'
 import { mkdir } from 'fs/promises'
 import { EventEmitter } from 'node:events'
 import { dirname } from 'path'
-import puppeteer from 'puppeteer'
+import type { Page as PuppeteerPage } from 'puppeteer'
 import { PassThrough, Writable } from 'stream'
 import which from 'which'
 import { PuppeteerCapture } from './PuppeteerCapture'
@@ -27,7 +27,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
   protected readonly _frameInterval: number
   protected readonly _onPageClose: () => void
   protected readonly _startStopMutex: Mutex
-  protected _page: puppeteer.Page | null
+  protected _page: PuppeteerPage | null
   protected _target: string | Writable | null
   protected _frameBeingCaptured: Promise<void> | null
   protected _captureTimestamp: number
@@ -77,7 +77,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._isCapturing = false
   }
 
-  public get page (): puppeteer.Page | null {
+  public get page (): PuppeteerPage | null {
     return this._page
   }
 
@@ -105,7 +105,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     return this._recordedFrames
   }
 
-  public async attach (page: puppeteer.Page): Promise<void> {
+  public async attach (page: PuppeteerPage): Promise<void> {
     if (this._page != null) {
       throw new Error('Already attached to a page')
     }
@@ -115,7 +115,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._page = page
   }
 
-  protected async _attach (page: puppeteer.Page): Promise<void> {
+  protected async _attach (page: PuppeteerPage): Promise<void> {
   }
 
   public async detach (): Promise<void> {
@@ -128,7 +128,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._page = null
   }
 
-  protected async _detach (page: puppeteer.Page): Promise<void> {
+  protected async _detach (page: PuppeteerPage): Promise<void> {
   }
 
   public async start (target: string | Writable, options?: PuppeteerCaptureStartOptions): Promise<void> {

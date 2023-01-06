@@ -1,15 +1,18 @@
-import puppeteer from 'puppeteer'
+import type { Browser as PuppeteerBrowser } from 'puppeteer'
 import { PassThrough } from 'stream'
 import { launch } from './launch'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
-const PUPPETEER_LAUNCH_ARGS = process.platform === 'win32' || process.getuid() !== 0
+/* eslint-disable-next-line @typescript-eslint/no-var-requires */
+const puppeteer = require(`puppeteer${process.env.PUPPETEER_CAPTURE__PUPPETEER_VERSION ?? ''}`)
+
+const PUPPETEER_LAUNCH_ARGS = (process.platform === 'win32' || process.getuid === undefined || process.getuid() !== 0)
   ? []
   : [
       '--no-sandbox' // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
     ]
 
-let browser: puppeteer.Browser
+let browser: PuppeteerBrowser
 afterEach(async () => {
   if (browser != null) {
     await browser.close()

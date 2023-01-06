@@ -1,12 +1,22 @@
-import puppeteer from 'puppeteer'
+import type {
+  Browser as PuppeteerBrowser,
+  BrowserConnectOptions as PuppeteerBrowserConnectOptions,
+  BrowserLaunchArgumentOptions as PuppeteerBrowserLaunchArgumentOptions,
+  LaunchOptions as PuppeteerLaunchOptions,
+  Product as PuppeteerProduct,
+  PuppeteerNode
+} from 'puppeteer'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
+/* eslint-disable-next-line @typescript-eslint/no-var-requires */
+const puppeteer = require(`puppeteer${process.env.PUPPETEER_CAPTURE__PUPPETEER_VERSION ?? ''}`)
+
 export async function launch (
-  options?: puppeteer.LaunchOptions & puppeteer.BrowserLaunchArgumentOptions & puppeteer.BrowserConnectOptions & {
-    product?: puppeteer.Product
+  options?: PuppeteerLaunchOptions & PuppeteerBrowserLaunchArgumentOptions & PuppeteerBrowserConnectOptions & {
+    product?: PuppeteerProduct
     extraPrefsFirefox?: Record<string, unknown>
   }
-): Promise<puppeteer.Browser> {
+): Promise<PuppeteerBrowser> {
   options = {
     ...(options != null ? options : {}),
     args: [
@@ -15,5 +25,5 @@ export async function launch (
     ]
   }
 
-  return await puppeteer.launch(options)
+  return await (puppeteer as PuppeteerNode).launch(options)
 }

@@ -1,4 +1,8 @@
-import puppeteer from 'puppeteer'
+import type {
+  Browser as PuppeteerBrowser,
+  CDPSession as PuppeteerCDPSession,
+  Page as PuppeteerPage
+} from 'puppeteer'
 import { Protocol } from 'devtools-protocol'
 import { MissingHeadlessExperimentalRequiredArgs } from './MissingHeadlessExperimentalRequiredArgs'
 import { PuppeteerCaptureBase } from './PuppeteerCaptureBase'
@@ -39,7 +43,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   protected readonly _ejector: string
   protected readonly _requestFrameCapture: () => void
   protected readonly _onSessionDisconnected: () => void
-  protected _session: puppeteer.CDPSession | null
+  protected _session: PuppeteerCDPSession | null
   protected _onNewDocumentScript: Protocol.Page.ScriptIdentifier | null
 
   public constructor (options?: PuppeteerCaptureOptions) {
@@ -59,7 +63,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     }
   }
 
-  protected getPageClient (page: puppeteer.Page): puppeteer.CDPSession {
+  protected getPageClient (page: PuppeteerPage): PuppeteerCDPSession {
     // Before puppeteer 14.4.0, the internal method was client()
     if ('client' in page) {
       // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
@@ -72,7 +76,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     return page._client()
   }
 
-  protected override async _attach (page: puppeteer.Page): Promise<void> {
+  protected override async _attach (page: PuppeteerPage): Promise<void> {
     PuppeteerCaptureViaHeadlessExperimental.validateBrowserArgs(page.browser())
 
     const session = await page.target().createCDPSession()
@@ -88,7 +92,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     this._onNewDocumentScript = onNewDocumentScript
   }
 
-  protected override async _detach (page: puppeteer.Page): Promise<void> {
+  protected override async _detach (page: PuppeteerPage): Promise<void> {
     if (this._onNewDocumentScript != null) {
       // NOTE: For details, see send('Page.addScriptToEvaluateOnNewDocument') code
       await this.getPageClient(page).send('Page.removeScriptToEvaluateOnNewDocument', {
@@ -121,12 +125,11 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     this.doRequestFrameCapture(this._page, this._session)
   }
 
-  protected doRequestFrameCapture (page: puppeteer.Page, session: puppeteer.CDPSession): void {
+  protected doRequestFrameCapture (page: PuppeteerPage, session: PuppeteerCDPSession): void {
     const captureTimestamp = this._captureTimestamp
     const frameInterval = this._frameInterval
     this._frameBeingCaptured = Promise.all(page.frames().map(async (frame) => {
-      const executionContext = await frame.executionContext()
-      await executionContext.evaluate(`${this._injected}.process(${captureTimestamp})`)
+      await frame.evaluate(`${this._injected}.process(${captureTimestamp})`)
     })).then(async () => {
       return await session.send('HeadlessExperimental.beginFrame', {
         frameTimeTicks: captureTimestamp,
@@ -173,9 +176,8 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     }
 
     for (const frame of page.frames()) {
-      const executionContext = await frame.executionContext()
-      await executionContext.evaluate(this._injector)
-      await executionContext.evaluate(`${this._injected}.activate()`)
+      await frame.evaluate(this._injector)
+      await frame.evaluate(`${this._injected}.activate()`)
     }
 
     await session.send('HeadlessExperimental.enable')
@@ -190,9 +192,8 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     }
 
     for (const frame of page.frames()) {
-      const executionContext = await frame.executionContext()
-      await executionContext.evaluate(`${this._injected}.deactivate()`)
-      await executionContext.evaluate(this._ejector)
+      await frame.evaluate(`${this._injected}.deactivate()`)
+      await frame.evaluate(this._ejector)
     }
 
     await session.send('HeadlessExperimental.disable')
@@ -210,7 +211,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
       .catch(() => { })
   }
 
-  protected static validateBrowserArgs (browser: puppeteer.Browser): void {
+  protected static validateBrowserArgs (browser: PuppeteerBrowser): void {
     const spawnargs = browser.process()?.spawnargs
     if (spawnargs == null || !PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS.every(arg => spawnargs.includes(arg))) {
       throw new MissingHeadlessExperimentalRequiredArgs()
