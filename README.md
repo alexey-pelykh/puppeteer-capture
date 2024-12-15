@@ -10,7 +10,8 @@ A Puppeteer plugin for capturing page as a video.
 
 ## Under The Hood
 
-[`HeadlessExperimental`](https://chromedevtools.github.io/devtools-protocol/tot/HeadlessExperimental/) is used to capture frames in a deterministic way. This approach allows to achieve better quality than using screencast.
+[`HeadlessExperimental`](https://chromedevtools.github.io/devtools-protocol/tot/HeadlessExperimental/) is used to
+capture frames in a deterministic way. This approach allows to achieve better quality than using screencast.
 
 ## Getting Started
 
@@ -32,7 +33,25 @@ const { capture, launch } = require('puppeteer-capture')
 })()
 ```
 
+## Time flow
+
+The browser is running in a deterministic mode, thus the time flow is not real time. To wait for a certain amount of
+time within the page's timeline, `PuppeteerCapture.waitForTimeout()` must be used:
+
+```js
+await page.waitForTimeout(1000)
+```
+
 ## Known Issues
+
+### Bad Chrome versions
+
+- `117.0.5938.88` (default for `puppeteer` version(s) `21.3.0` ): reacts with `targetCrashed`
+- `117.0.5938.92` (default for `puppeteer` version(s) `21.3.2`…`21.3.6`): reacts with `targetCrashed`
+- `117.0.5938.149` (default for `puppeteer` version(s) `21.3.7`…`21.3.8`): reacts with `targetCrashed`
+- `118.0.5993.70` (default for `puppeteer` version(s) `21.4.0`…`21.4.1`): reacts with `targetCrashed`
+- `119.0.6045.105` (default for `puppeteer` version(s) `21.5.0`…`21.7.0`): reacts with `targetCrashed`
+- `120.0.6099.109` (default for `puppeteer` version(s) `21.8.0`): reacts with `targetCrashed`
 
 ### MacOS is not supported
 
@@ -40,15 +59,20 @@ Unfortunately, [it is so](https://source.chromium.org/chromium/chromium/src/+/ma
 
 ## No capturing == Nothing happens
 
-This relates to timers, animations, clicks, etc. To process interaction with the page, frame requests have to be submitted and thus capturing have to be active.
+This relates to timers, animations, clicks, etc. To process interaction with the page, frame requests have to be
+submitted and thus capturing have to be active.
 
 ## Setting `defaultViewport` causes rendering to freeze
 
 The exact origin of the issue is not yet known, yet it's likely to be related to the deterministic mode.
 
-Calling `page.setViewport()` before starting the capture behaves the same, yet calling it _after_ starting the capture works yet not always. Thus it's safe to assume that there's some sort of race condition, since adding `page.waitForTimeout(100)` just before setting the viewport workarounds the issue.
+Calling `page.setViewport()` before starting the capture behaves the same, yet calling it _after_ starting the capture
+works yet not always. Thus it's safe to assume that there's some sort of race condition, since adding
+`page.waitForTimeout(100)` just before setting the viewport workarounds the issue.
 
-Also it should be taken into account that since frame size is going to change over the time of the recording, frame size autodetection will fail. To workaround this issue, frame size have to be specified:
+Also it should be taken into account that since frame size is going to change over the time of the recording, frame size
+autodetection will fail. To workaround this issue, frame size have to be specified:
+
 ```js
 const recorder = await capture(page, {
   size: `${viewportWidth}x${viewportHeight}`,
@@ -62,8 +86,8 @@ await page.setViewport({
 })
 ```
 
-A friendlier workaround is enabled by default: `recorder.start()` automatically waits for the first frame to be captured.
-This approach seems to allow bypassing the alleged race condition:
+A friendlier workaround is enabled by default: `recorder.start()` automatically waits for the first frame to be
+captured. This approach seems to allow bypassing the alleged race condition:
 
 ```js
 const recorder = await capture(page, {
@@ -79,9 +103,12 @@ await page.setViewport({
 
 ## `waitForTimeout()` won't work
 
-The `Page.waitForTimeout()` method implementation essentially forwards the call to the `Frame.waitForTimeout()` on the `page.mainFrame()`. The latter is implemented via `setTimeout()`, thus can not work in deterministic mode at all.
+The `Page.waitForTimeout()` method implementation essentially forwards the call to the `Frame.waitForTimeout()` on the
+`page.mainFrame()`. The latter is implemented via `setTimeout()`, thus can not work in deterministic mode at all.
 
-To workaround this issue, there's a `PuppeteerCapture.waitForTimeout()` that waits for the timeout in the timeline of the captured page, which is not real time at all. For convenience, while capturing is active, the page's `waitForTimeout()` becomes a wrapper for `PuppeteerCapture.waitForTimeout()`.
+To workaround this issue, there's a `PuppeteerCapture.waitForTimeout()` that waits for the timeout in the timeline of
+the captured page, which is not real time at all. For convenience, while capturing is active, the page's
+`waitForTimeout()` becomes a wrapper for `PuppeteerCapture.waitForTimeout()`.
 
 ## Multiple `start()`/`stop()` fail
 
@@ -108,11 +135,11 @@ await page.goto('https://google.com') // Possible capture would happen here, thu
 
 `PuppeteerCapture` supports following events:
 
- - `captureStarted`: capture was successfully started
- - `frameCaptured`: frame was captured
- - `frameCaptureFailed`: frame capture failed
- - `frameRecorded`: frame has been submitted to `ffmpeg`
- - `captureStopped`: capture was stopped
+- `captureStarted`: capture was successfully started
+- `frameCaptured`: frame was captured
+- `frameCaptureFailed`: frame capture failed
+- `frameRecorded`: frame has been submitted to `ffmpeg`
+- `captureStopped`: capture was stopped
 
 ## Dependencies
 

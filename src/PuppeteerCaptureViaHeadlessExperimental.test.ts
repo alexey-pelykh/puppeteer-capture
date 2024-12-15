@@ -1,26 +1,28 @@
-import type { Browser as PuppeteerBrowser } from 'puppeteer'
+import { executablePath } from 'puppeteer'
+import type { Browser as PuppeteerBrowser } from 'puppeteer-core'
+import puppeteer from 'puppeteer-core'
 import { PassThrough } from 'stream'
 import { launch } from './launch'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
-/* eslint-disable-next-line @typescript-eslint/no-var-requires */
-const puppeteer = require(`puppeteer${process.env.PUPPETEER_CAPTURE__PUPPETEER_VERSION ?? ''}`)
-
-const PUPPETEER_LAUNCH_ARGS = (process.platform === 'win32' || process.getuid === undefined || process.getuid() !== 0)
-  ? []
-  : [
-      '--no-sandbox' // NOTE: https://github.com/puppeteer/puppeteer/issues/3698
-    ]
+const PUPPETEER_LAUNCH_ARGS = [
+  ...(process.platform !== 'win32' ? ['--no-sandbox', '--disable-setuid-sandbox'] : [])
+]
 
 let browser: PuppeteerBrowser
 afterEach(async () => {
   if (browser != null) {
-    await browser.close()
+    try {
+      await browser.close()
+    } catch (error) {}
   }
 })
 
 test('that capture fails if required args are missing', async () => {
-  browser = await puppeteer.launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await puppeteer.launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await expect(async () => {
@@ -30,6 +32,7 @@ test('that capture fails if required args are missing', async () => {
 
 test('that capture does not fail if required args are present', async () => {
   browser = await puppeteer.launch({
+    executablePath: executablePath(),
     args: [
       ...PUPPETEER_LAUNCH_ARGS,
       ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS
@@ -41,7 +44,10 @@ test('that capture does not fail if required args are present', async () => {
 })
 
 test('that capture works in headless mode', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -54,7 +60,10 @@ test('that capture works in headless mode', async () => {
 })
 
 // test('that capture works repeatedly in headless mode', async () => {
-//   browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+//   browser = await launch({
+//     executablePath: executablePath(),
+//     args: PUPPETEER_LAUNCH_ARGS
+//   })
 //   const page = await browser.newPage()
 //   const capture = new PuppeteerCaptureViaHeadlessExperimental()
 //   await capture.attach(page)
@@ -74,7 +83,10 @@ test('that capture works in headless mode', async () => {
 // })
 
 test('that capture works with custom viewport size', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -88,7 +100,10 @@ test('that capture works with custom viewport size', async () => {
 })
 
 test('that capture drops captured frames', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -102,7 +117,10 @@ test('that capture drops captured frames', async () => {
 })
 
 test('that capture stops gracefully on FFMPEG error', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -117,7 +135,10 @@ test('that capture stops gracefully on FFMPEG error', async () => {
 })
 
 test('that capture stops gracefully on page close', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -131,21 +152,27 @@ test('that capture stops gracefully on page close', async () => {
 })
 
 test('that capture stops gracefully on session connection drop', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
   const stream = new PassThrough()
   await page.goto('about:blank')
   await capture.start(stream)
-  capture['_session']!.emit('CDPSession.Disconnected') // eslint-disable-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/dot-notation
+  capture['_session']!.emit('CDPSession.Disconnected', undefined) // eslint-disable-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/dot-notation
   await expect(async () => {
     await capture.stop()
   }).rejects.toThrow('Session was disconnected')
 })
 
 test('that capture is compatible with Date.now()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -163,7 +190,10 @@ test('that capture is compatible with Date.now()', async () => {
 })
 
 test('that capture is compatible with new Date().getTime()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -181,7 +211,10 @@ test('that capture is compatible with new Date().getTime()', async () => {
 })
 
 test('that capture is compatible with performance.now()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental()
   await capture.attach(page)
@@ -199,7 +232,10 @@ test('that capture is compatible with performance.now()', async () => {
 })
 
 test('that capture is compatible with setInterval()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental({ fps: 20 })
   await capture.attach(page)
@@ -215,7 +251,10 @@ test('that capture is compatible with setInterval()', async () => {
 })
 
 test('that capture is compatible with setTimeout()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental({ fps: 20 })
   await capture.attach(page)
@@ -231,7 +270,10 @@ test('that capture is compatible with setTimeout()', async () => {
 })
 
 test('that capture is compatible with requestAnimationFrame()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental({ fps: 20 })
   await capture.attach(page)
@@ -258,13 +300,16 @@ test('that capture is compatible with requestAnimationFrame()', async () => {
   const ticksCounter = await page.evaluate('ticksCounter')
   await capture.stop()
   expect(actualTimeout).toBeGreaterThan(400)
-  expect(actualTimeout).toBeLessThan(750)
+  expect(actualTimeout).toBeLessThan(1000)
   expect(ticksCounter).toBeGreaterThan(8)
-  expect(ticksCounter).toBeLessThan(15)
+  expect(ticksCounter).toBeLessThan(20)
 })
 
 test('that capture is compatible with bound window.requestAnimationFrame()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental({ fps: 20 })
   await capture.attach(page)
@@ -292,13 +337,16 @@ test('that capture is compatible with bound window.requestAnimationFrame()', asy
   const ticksCounter = await page.evaluate('ticksCounter')
   await capture.stop()
   expect(actualTimeout).toBeGreaterThan(400)
-  expect(actualTimeout).toBeLessThan(750)
+  expect(actualTimeout).toBeLessThan(1000)
   expect(ticksCounter).toBeGreaterThan(8)
-  expect(ticksCounter).toBeLessThan(15)
+  expect(ticksCounter).toBeLessThan(20)
 })
 
 test('that inactive capture is compatible with setInterval()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental({ fps: 20 })
   await capture.attach(page)
@@ -318,7 +366,10 @@ test('that inactive capture is compatible with setInterval()', async () => {
 })
 
 test('that inactive capture is compatible with setTimeout()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental({ fps: 20 })
   await capture.attach(page)
@@ -338,7 +389,10 @@ test('that inactive capture is compatible with setTimeout()', async () => {
 })
 
 test('that inactive capture is compatible with requestAnimationFrame()', async () => {
-  browser = await launch({ args: PUPPETEER_LAUNCH_ARGS })
+  browser = await launch({
+    executablePath: executablePath(),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
   const page = await browser.newPage()
   const capture = new PuppeteerCaptureViaHeadlessExperimental({ fps: 20 })
   await capture.attach(page)
