@@ -7,52 +7,170 @@ on:
     branches: [ main ]
 
 jobs:
+
   build:
     runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         os:
           - ubuntu-latest
           - windows-latest
         node-version:
-          - lts/fermium
-          - lts/gallium
-        puppeteer-version:
-          - '14.0'
-          - '14.1'
-          - '14.2'
-          - '14.3'
-          - '14.4'
-          - '15.0'
-          - '15.1'
-          - '15.2'
-          - '15.3'
-          - '15.4'
-          - '15.5'
-          - '16.0'
-          - '16.1'
-          - '16.2'
-          - '17.0'
-          - '17.1'
-          - '18.0'
-          - '18.1'
-          - '18.2'
-          - '19.0'
-          - '19.1'
-          - '19.2'
-          - '19.3'
-          - '19.4'
+          - lts/iron
+          - lts/jod
+
     env:
-      PUPPETEER_CAPTURE__PUPPETEER_VERSION: -${{ matrix.puppeteer-version }}
+      PUPPETEER_VERSION: 21.11.0
+
     steps:
-      - uses: actions/checkout@v3
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run test
+
+      - name: Get npm cache location
+        id: get-npm-cache
+        shell: bash
+        run: |
+          echo "NPM_CONFIG_CACHE=$(npm config get cache)" >> "$GITHUB_ENV"
+          echo "npm_config_cache=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.get-npm-cache.outputs.npm_config_cache }}
+          key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Cache Puppeteer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer/
+          key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ env.PUPPETEER_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
       - name: Codecov
-        uses: codecov/codecov-action@v3.1.0
+        uses: codecov/codecov-action@v5
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+  integration:
+    runs-on: ${{ matrix.os }}
+
+    needs:
+      - build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        puppeteer-version:
+          - '18.2.1'
+          - '19.0.0'
+          - '19.1.1'  # NOTE: Should've been 19.1.2 but there's no puppeteer-core@19.1.2
+          - '19.2.2'
+          - '19.3.0'
+          - '19.4.1'
+          - '19.5.2'
+          - '19.6.3'
+          - '19.7.5'
+          - '19.8.5'
+          - '19.9.1'
+          - '19.10.1'
+          - '19.11.1'
+          - '20.0.0'
+          - '20.1.2'
+          - '20.2.1'
+          - '20.3.0'
+          - '20.4.0'
+          - '20.5.0'
+          - '20.6.0'
+          - '20.7.4'
+          - '20.8.3'
+          - '20.9.0'
+          - '21.0.3'
+          - '21.1.1'
+          - '21.2.1'
+          # - '21.3.0'  # NOTE: Puppeteer v21.3.0 with Chrome r117.0.5938.88 reacts with "targetCrashed"
+          # - '21.3.1'  # NOTE: Puppeteer v21.3.1 with Chrome r117.0.5938.88 reacts with "targetCrashed"
+          # - '21.3.2'  # NOTE: Puppeteer v21.3.2 with Chrome r117.0.5938.92 reacts with "targetCrashed"
+          # - '21.3.3'  # NOTE: Puppeteer v21.3.3 with Chrome r117.0.5938.92 reacts with "targetCrashed"
+          # - '21.3.4'  # NOTE: Puppeteer v21.3.4 with Chrome r117.0.5938.92 reacts with "targetCrashed"
+          # - '21.3.5'  # NOTE: Puppeteer v21.3.5 with Chrome r117.0.5938.92 reacts with "targetCrashed"
+          # - '21.3.6'  # NOTE: Puppeteer v21.3.6 with Chrome r117.0.5938.92 reacts with "targetCrashed"
+          # - '21.3.7'  # NOTE: Puppeteer v21.3.7 with Chrome r117.0.5938.149 reacts with "targetCrashed"
+          # - '21.3.8'  # NOTE: Puppeteer v21.3.8 with Chrome r117.0.5938.149 reacts with "targetCrashed"
+          # - '21.4.0'  # NOTE: Puppeteer v21.4.0 with Chrome r118.0.5993.70 reacts with "targetCrashed"
+          # - '21.4.1'  # NOTE: Puppeteer v21.4.1 with Chrome r118.0.5993.70 reacts with "targetCrashed"
+          # - '21.5.0'  # NOTE: Puppeteer v21.5.0 with Chrome r119.0.6045.105 reacts with "targetCrashed"
+          # - '21.5.1'  # NOTE: Puppeteer v21.5.1 with Chrome r119.0.6045.105 reacts with "targetCrashed"
+          # - '21.5.2'  # NOTE: Puppeteer v21.5.2 with Chrome r119.0.6045.105 reacts with "targetCrashed"
+          # - '21.6.0'  # NOTE: Puppeteer v21.6.0 with Chrome r119.0.6045.105 reacts with "targetCrashed"
+          # - '21.6.1'  # NOTE: Puppeteer v21.6.1 with Chrome r119.0.6045.105 reacts with "targetCrashed"
+          # - '21.7.0'  # NOTE: Puppeteer v21.7.0 with Chrome r119.0.6045.105 reacts with "targetCrashed"
+          # - '21.8.0'  # NOTE: Puppeteer v21.8.0 with Chrome r120.0.6099.109 reacts with "targetCrashed"
+          - '21.9.0'
+          - '21.10.0'
+          - '21.11.0'
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Get npm cache location
+        id: get-npm-cache
+        shell: bash
+        run: |
+          echo "NPM_CONFIG_CACHE=$(npm config get cache)" >> "$GITHUB_ENV"
+          echo "npm_config_cache=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.get-npm-cache.outputs.npm_config_cache }}
+          key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
+
+      # NOTE: Chrome r112.0.5615.121 is not available on https://edgedl.me.gvt1.com, use 113.0.5672.63 from 20.1.0
+      - name: Override Chrome revision (for puppeteer@20.0.0)
+        if: ${{ matrix.puppeteer-version == '20.0.0' }}
+        shell: bash
+        run: |
+          echo "PUPPETEER_BROWSER_REVISION=113.0.5672.63" >> $GITHUB_ENV
+
+      - name: Install Puppeteer ${{ matrix.puppeteer-version }}
+        run: npm install 'puppeteer@${{ matrix.puppeteer-version }}' 'puppeteer-core@${{ matrix.puppeteer-version }}'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify the Puppeteer and Puppeteer-Core versions
+        run: |
+          node -e "process.exit(require('puppeteer/package.json').version == '${{ matrix.puppeteer-version }}' ? 0 : 1)"
+          node -e "process.exit(require('puppeteer-core/package.json').version == '${{ matrix.puppeteer-version }}' ? 0 : 1)"
+
+      - name: Test
+        env:
+          DEBUG: "puppeteer:protocol:*"
+          DEBUG_MAX_STRING_LENGTH: "null"
+        run: npm run test

@@ -1,4 +1,4 @@
-import type { Page as PuppeteerPage } from 'puppeteer'
+import type { Page as PuppeteerPage } from 'puppeteer-core'
 import { PuppeteerCapture } from './PuppeteerCapture'
 import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'

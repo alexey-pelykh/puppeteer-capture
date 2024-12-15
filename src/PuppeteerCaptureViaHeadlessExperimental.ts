@@ -1,9 +1,9 @@
+import { Protocol } from 'devtools-protocol'
 import type {
   Browser as PuppeteerBrowser,
   CDPSession as PuppeteerCDPSession,
   Page as PuppeteerPage
-} from 'puppeteer'
-import { Protocol } from 'devtools-protocol'
+} from 'puppeteer-core'
 import { MissingHeadlessExperimentalRequiredArgs } from './MissingHeadlessExperimentalRequiredArgs'
 import { PuppeteerCaptureBase } from './PuppeteerCaptureBase'
 import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'

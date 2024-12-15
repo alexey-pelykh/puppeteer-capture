@@ -3,13 +3,10 @@ import type {
   BrowserConnectOptions as PuppeteerBrowserConnectOptions,
   BrowserLaunchArgumentOptions as PuppeteerBrowserLaunchArgumentOptions,
   LaunchOptions as PuppeteerLaunchOptions,
-  Product as PuppeteerProduct,
-  PuppeteerNode
-} from 'puppeteer'
+  Product as PuppeteerProduct
+} from 'puppeteer-core'
+import puppeteer from 'puppeteer-core'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
-
-/* eslint-disable-next-line @typescript-eslint/no-var-requires */
-const puppeteer = require(`puppeteer${process.env.PUPPETEER_CAPTURE__PUPPETEER_VERSION ?? ''}`)
 
 export async function launch (
   options?: PuppeteerLaunchOptions & PuppeteerBrowserLaunchArgumentOptions & PuppeteerBrowserConnectOptions & {
@@ -25,5 +22,5 @@ export async function launch (
     ]
   }
 
-  return await (puppeteer as PuppeteerNode).launch(options)
+  return await puppeteer.launch(options)
 }
