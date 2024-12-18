@@ -1,12 +1,16 @@
 # puppeteer-capture
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/alexey-pelykh/puppeteer-capture?style=flat&logo=github)](https://github.com/alexey-pelykh/puppeteer-capture)
+[![GitHub license](https://img.shields.io/github/license/alexey-pelykh/puppeteer-capture)](https://github.com/alexey-pelykh/puppeteer-capture/blob/main/LICENSE)
 ![node-current](https://img.shields.io/node/v/puppeteer-capture)
+[![NPM Version](https://img.shields.io/npm/v/puppeteer-capture)](https://www.npmjs.com/package/puppeteer-capture)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/alexey-pelykh/puppeteer-capture/ci.yml?branch=main)
 ![Codecov](https://img.shields.io/codecov/c/gh/alexey-pelykh/puppeteer-capture)
 ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/alexey-pelykh/puppeteer-capture)
-[![GitHub license](https://img.shields.io/github/license/alexey-pelykh/puppeteer-capture)](https://github.com/alexey-pelykh/puppeteer-capture/blob/main/LICENSE)
 
-A Puppeteer plugin for capturing page as a video.
+A Puppeteer plugin for capturing page as a video with ultimate quality.
+
+This project is brought to you by [Alexey Pelykh](https://github.com/alexey-pelykh).
 
 ## Under The Hood
 
@@ -57,12 +61,12 @@ await page.waitForTimeout(1000)
 
 Unfortunately, [it is so](https://source.chromium.org/chromium/chromium/src/+/main:headless/lib/browser/protocol/target_handler.cc;drc=5811aa08e60ba5ac7622f029163213cfbdb682f7;l=32).
 
-## No capturing == Nothing happens
+### No capturing == Nothing happens
 
 This relates to timers, animations, clicks, etc. To process interaction with the page, frame requests have to be
 submitted and thus capturing have to be active.
 
-## Setting `defaultViewport` causes rendering to freeze
+### Setting `defaultViewport` causes rendering to freeze
 
 The exact origin of the issue is not yet known, yet it's likely to be related to the deterministic mode.
 
@@ -101,7 +105,7 @@ await page.setViewport({
 })
 ```
 
-## `waitForTimeout()` won't work
+### `waitForTimeout()` won't work
 
 The `Page.waitForTimeout()` method implementation essentially forwards the call to the `Frame.waitForTimeout()` on the
 `page.mainFrame()`. The latter is implemented via `setTimeout()`, thus can not work in deterministic mode at all.
@@ -110,11 +114,11 @@ To workaround this issue, there's a `PuppeteerCapture.waitForTimeout()` that wai
 the captured page, which is not real time at all. For convenience, while capturing is active, the page's
 `waitForTimeout()` becomes a wrapper for `PuppeteerCapture.waitForTimeout()`.
 
-## Multiple `start()`/`stop()` fail
+### Multiple `start()`/`stop()` fail
 
 It's unclear why, yet after disabling and re-enabling the capture, callbacks from browser stop arriving.
 
-## Time-related functions are affected
+### Time-related functions are affected
 
 The following functions have to be overriden with injected versions:
 
