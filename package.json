@@ -1,7 +1,7 @@
 {
   "name": "puppeteer-capture",
   "version": "0.0.0",
-  "description": "A Puppeteer plugin for capturing page as a video.",
+  "description": "A Puppeteer plugin for capturing page as a video with ultimate quality.",
   "scripts": {
     "build": "rimraf ./lib && tsc --project ./tsconfig.build.json",
     "test": "jest --runInBand --coverage --detectOpenHandles --forceExit",
@@ -16,13 +16,13 @@
   "author": {
     "name": "Alexey Pelykh",
     "email": "alexey.pelykh@gmail.com",
-    "url": "https://github.com/alexey-pelykh"
+    "url": "https://alexey-pelykh.com"
   },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/alexey-pelykh/puppeteer-capture/issues"
   },
-  "homepage": "https://github.com/alexey-pelykh/puppeteer-capture#readme",
+  "homepage": "https://pptr-capture.org",
   "keywords": [
     "puppeteer",
     "page",
