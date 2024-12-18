@@ -124,13 +124,6 @@ jobs:
           key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
 
-      # NOTE: Chrome r112.0.5615.121 is not available on https://edgedl.me.gvt1.com, use 113.0.5672.63 from 20.1.0
-      - name: Override Chrome revision (for puppeteer@20.0.0)
-        if: ${{ matrix.puppeteer-version == '20.0.0' }}
-        shell: bash
-        run: |
-          echo "PUPPETEER_BROWSER_REVISION=113.0.5672.63" >> $GITHUB_ENV
-
       - name: Cache Puppeteer
         uses: actions/cache@v4
         with:
