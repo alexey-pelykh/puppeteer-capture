@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises'
 import { executablePath } from 'puppeteer'
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core'
 import puppeteer from 'puppeteer-core'
@@ -21,6 +22,7 @@ afterEach(async () => {
 test('that capture fails if required args are missing', async () => {
   browser = await puppeteer.launch({
     executablePath: executablePath(),
+    headless: 'shell',
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -54,7 +56,7 @@ test('that capture works in headless mode', async () => {
   const stream = new PassThrough()
   await page.goto('about:blank')
   await capture.start(stream)
-  await page.waitForTimeout(32)
+  await capture.waitForTimeout(32)
   await capture.stop()
   expect(capture.capturedFrames).toBeGreaterThan(1)
 })
@@ -71,13 +73,13 @@ test('that capture works in headless mode', async () => {
 
 //   const stream1 = new PassThrough()
 //   await capture.start(stream1)
-//   await page.waitForTimeout(32)
+//   await capture.waitForTimeout(32)
 //   await capture.stop()
 //   expect(capture.capturedFrames).toBeGreaterThan(1)
 
 //   const stream2 = new PassThrough()
 //   await capture.start(stream2)
-//   await page.waitForTimeout(32)
+//   await capture.waitForTimeout(32)
 //   await capture.stop()
 //   expect(capture.capturedFrames).toBeGreaterThan(1)
 // })
@@ -94,7 +96,7 @@ test('that capture works with custom viewport size', async () => {
   await page.goto('about:blank')
   await capture.start(stream)
   await page.setViewport({ width: 1920, height: 1080 })
-  await page.waitForTimeout(32)
+  await capture.waitForTimeout(32)
   await capture.stop()
   expect(capture.capturedFrames).toBeGreaterThan(1)
 })
@@ -110,7 +112,7 @@ test('that capture drops captured frames', async () => {
   const stream = new PassThrough()
   await page.goto('about:blank')
   await capture.start(stream, { dropCapturedFrames: true })
-  await page.waitForTimeout(32)
+  await capture.waitForTimeout(32)
   await capture.stop()
   expect(capture.capturedFrames).toBeGreaterThan(1)
   expect(capture.recordedFrames).toBe(0)
@@ -180,7 +182,7 @@ test('that capture is compatible with Date.now()', async () => {
   await page.goto('about:blank')
   await capture.start(stream)
   const beforeTimeout = await page.evaluate('Date.now()') as number
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const afterTimeout = await page.evaluate('Date.now()') as number
   await capture.stop()
   expect(afterTimeout).toBeGreaterThan(beforeTimeout)
@@ -201,7 +203,7 @@ test('that capture is compatible with new Date().getTime()', async () => {
   await page.goto('about:blank')
   await capture.start(stream)
   const beforeTimeout = await page.evaluate('new Date().getTime()') as number
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const afterTimeout = await page.evaluate('new Date().getTime()') as number
   await capture.stop()
   expect(afterTimeout).toBeGreaterThan(beforeTimeout)
@@ -222,7 +224,7 @@ test('that capture is compatible with performance.now()', async () => {
   await page.goto('about:blank')
   await capture.start(stream)
   const beforeTimeout = await page.evaluate('performance.now()') as number
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const afterTimeout = await page.evaluate('performance.now()') as number
   await capture.stop()
   expect(afterTimeout).toBeGreaterThan(beforeTimeout)
@@ -243,7 +245,7 @@ test('that capture is compatible with setInterval()', async () => {
   await page.goto('about:blank')
   await capture.start(stream)
   await page.evaluate('ticksCounter = 0; setInterval(function () { ticksCounter += 1 }, 50)')
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const ticksCounter = await page.evaluate('ticksCounter')
   await capture.stop()
   expect(ticksCounter).toBeGreaterThan(8)
@@ -262,7 +264,7 @@ test('that capture is compatible with setTimeout()', async () => {
   await page.goto('about:blank')
   await capture.start(stream)
   await page.evaluate('ticksCounter = -1; function tick() { ticksCounter += 1; setTimeout(tick, 50) }; tick();')
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const ticksCounter = await page.evaluate('ticksCounter')
   await capture.stop()
   expect(ticksCounter).toBeGreaterThan(8)
@@ -295,7 +297,7 @@ test('that capture is compatible with requestAnimationFrame()', async () => {
     };
     requestAnimationFrame(tick);
   `)
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const actualTimeout = await page.evaluate('timeout')
   const ticksCounter = await page.evaluate('ticksCounter')
   await capture.stop()
@@ -332,7 +334,7 @@ test('that capture is compatible with bound window.requestAnimationFrame()', asy
     };
     rAF(tick);
   `)
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const actualTimeout = await page.evaluate('timeout')
   const ticksCounter = await page.evaluate('ticksCounter')
   await capture.stop()
@@ -353,13 +355,13 @@ test('that inactive capture is compatible with setInterval()', async () => {
   const stream = new PassThrough()
   await page.goto('about:blank')
   await page.evaluate('ticksCounter = 0; setInterval(function () { ticksCounter += 1 }, 50)')
-  await page.waitForTimeout(500)
+  await setTimeout(500)
   const inactiveCaptureTicksCounter = await page.evaluate('ticksCounter')
   expect(inactiveCaptureTicksCounter).toBeGreaterThan(0)
 
   await capture.start(stream)
   await page.evaluate('ticksCounter = 0')
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const activeCaptureTicksCounter = await page.evaluate('ticksCounter') as number
   await capture.stop()
   expect(activeCaptureTicksCounter).toBeGreaterThan(0)
@@ -376,13 +378,13 @@ test('that inactive capture is compatible with setTimeout()', async () => {
   const stream = new PassThrough()
   await page.goto('about:blank')
   await page.evaluate('ticksCounter = -1; function tick() { ticksCounter += 1; setTimeout(tick, 50) }; tick();')
-  await page.waitForTimeout(500)
+  await setTimeout(500)
   const inactiveCaptureTicksCounter = await page.evaluate('ticksCounter')
   expect(inactiveCaptureTicksCounter).toBeGreaterThan(0)
 
   await capture.start(stream)
   await page.evaluate('ticksCounter = 0')
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const activeCaptureTicksCounter = await page.evaluate('ticksCounter') as number
   await capture.stop()
   expect(activeCaptureTicksCounter).toBeGreaterThan(0)
@@ -413,7 +415,7 @@ test('that inactive capture is compatible with requestAnimationFrame()', async (
     };
     requestAnimationFrame(tick);
   `)
-  await page.waitForTimeout(500)
+  await setTimeout(500)
   const [inactiveCaptureTicksCounter, inactiveActualTimeout] = await page.evaluate('[ticksCounter, timeout]') as number[]
   expect(inactiveCaptureTicksCounter).toBeGreaterThan(0)
   expect(inactiveActualTimeout).toBeGreaterThan(0)
@@ -424,7 +426,7 @@ test('that inactive capture is compatible with requestAnimationFrame()', async (
     timeout = 0;
     previousTimeout = null;
   `)
-  await page.waitForTimeout(500)
+  await capture.waitForTimeout(500)
   const [activeCaptureTicksCounter, activeActualTimeout] = await page.evaluate('[ticksCounter, timeout]') as number[]
   await capture.stop()
   expect(activeCaptureTicksCounter).toBeGreaterThan(0)

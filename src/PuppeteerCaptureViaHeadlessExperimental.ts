@@ -10,6 +10,7 @@ import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 
 export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBase {
   public static readonly REQUIRED_ARGS = [
+    '--headless=old',
     '--deterministic-mode',
     '--enable-begin-frame-control',
     '--disable-new-content-rendering-timeout',
