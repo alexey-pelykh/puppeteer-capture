@@ -1,18 +1,12 @@
 import type {
   Browser as PuppeteerBrowser,
-  BrowserConnectOptions as PuppeteerBrowserConnectOptions,
-  BrowserLaunchArgumentOptions as PuppeteerBrowserLaunchArgumentOptions,
-  LaunchOptions as PuppeteerLaunchOptions,
-  Product as PuppeteerProduct
+  PuppeteerLaunchOptions
 } from 'puppeteer-core'
 import puppeteer from 'puppeteer-core'
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
 export async function launch (
-  options?: PuppeteerLaunchOptions & PuppeteerBrowserLaunchArgumentOptions & PuppeteerBrowserConnectOptions & {
-    product?: PuppeteerProduct
-    extraPrefsFirefox?: Record<string, unknown>
-  }
+  options?: PuppeteerLaunchOptions
 ): Promise<PuppeteerBrowser> {
   options = {
     ...(options != null ? options : {}),

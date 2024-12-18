@@ -22,7 +22,6 @@ afterEach(async () => {
 test('that capture fails if required args are missing', async () => {
   browser = await puppeteer.launch({
     executablePath: executablePath(),
-    headless: 'shell',
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
