@@ -50,8 +50,8 @@ await recorder.waitForTimeout(1000)
 
 ### `--headless=new` is not supported
 
-Sadly, [it is so](https://issues.chromium.org/issues/361863270#comment2). Starting with Puppeteer v22, `--headless=new`
-is used by default so the plugin overrides with `--headless=old`.
+Sadly, [it is so](https://issues.chromium.org/issues/361863270#comment2). For Puppeteer v23+, the plugin enforces use
+of the `chrome-headless-shell` binary.
 
 ### Bad Chrome versions
 
