@@ -5,12 +5,12 @@ import type {
   Page as PuppeteerPage
 } from 'puppeteer-core'
 import { MissingHeadlessExperimentalRequiredArgs } from './MissingHeadlessExperimentalRequiredArgs'
+import { NotChromeHeadlessShell } from './NotChromeHeadlessShell'
 import { PuppeteerCaptureBase } from './PuppeteerCaptureBase'
 import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'
 
 export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBase {
   public static readonly REQUIRED_ARGS = [
-    '--headless=old',
     '--deterministic-mode',
     '--enable-begin-frame-control',
     '--disable-new-content-rendering-timeout',
@@ -213,8 +213,17 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   }
 
   protected static validateBrowserArgs (browser: PuppeteerBrowser): void {
+    const spawnfile = browser.process()?.spawnfile
+    if (spawnfile === null || spawnfile === undefined || !spawnfile.includes('chrome-headless-shell')) {
+      throw new NotChromeHeadlessShell(spawnfile ?? 'unknown')
+    }
+
     const spawnargs = browser.process()?.spawnargs
-    if (spawnargs == null || !PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS.every(arg => spawnargs.includes(arg))) {
+    if (
+      spawnargs === null ||
+      spawnargs === undefined ||
+      !PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS.every(arg => spawnargs.includes(arg))
+    ) {
       throw new MissingHeadlessExperimentalRequiredArgs()
     }
   }

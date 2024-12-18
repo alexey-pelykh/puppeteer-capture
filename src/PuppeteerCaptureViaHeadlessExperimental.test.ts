@@ -19,7 +19,7 @@ afterEach(async () => {
   }
 })
 
-test('that capture fails if required args are missing', async () => {
+test('that capture fails if not chrome-headless-shell', async () => {
   browser = await puppeteer.launch({
     executablePath: executablePath(),
     args: PUPPETEER_LAUNCH_ARGS
@@ -31,9 +31,21 @@ test('that capture fails if required args are missing', async () => {
   }).rejects.toThrow()
 })
 
+test('that capture fails if required args are missing', async () => {
+  browser = await puppeteer.launch({
+    executablePath: executablePath({ headless: 'shell' }),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
+  const page = await browser.newPage()
+  const capture = new PuppeteerCaptureViaHeadlessExperimental()
+  await expect(async () => {
+    await capture.attach(page)
+  }).rejects.toThrow()
+})
+
 test('that capture does not fail if required args are present', async () => {
   browser = await puppeteer.launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: [
       ...PUPPETEER_LAUNCH_ARGS,
       ...PuppeteerCaptureViaHeadlessExperimental.REQUIRED_ARGS
@@ -46,7 +58,7 @@ test('that capture does not fail if required args are present', async () => {
 
 test('that capture works in headless mode', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -62,7 +74,7 @@ test('that capture works in headless mode', async () => {
 
 // test('that capture works repeatedly in headless mode', async () => {
 //   browser = await launch({
-//     executablePath: executablePath(),
+//     executablePath: executablePath({ headless: 'shell' }),
 //     args: PUPPETEER_LAUNCH_ARGS
 //   })
 //   const page = await browser.newPage()
@@ -85,7 +97,7 @@ test('that capture works in headless mode', async () => {
 
 test('that capture works with custom viewport size', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -102,7 +114,7 @@ test('that capture works with custom viewport size', async () => {
 
 test('that capture drops captured frames', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -119,7 +131,7 @@ test('that capture drops captured frames', async () => {
 
 test('that capture stops gracefully on FFMPEG error', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -137,7 +149,7 @@ test('that capture stops gracefully on FFMPEG error', async () => {
 
 test('that capture stops gracefully on page close', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -154,7 +166,7 @@ test('that capture stops gracefully on page close', async () => {
 
 test('that capture stops gracefully on session connection drop', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -171,7 +183,7 @@ test('that capture stops gracefully on session connection drop', async () => {
 
 test('that capture is compatible with Date.now()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -192,7 +204,7 @@ test('that capture is compatible with Date.now()', async () => {
 
 test('that capture is compatible with new Date().getTime()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -213,7 +225,7 @@ test('that capture is compatible with new Date().getTime()', async () => {
 
 test('that capture is compatible with performance.now()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -234,7 +246,7 @@ test('that capture is compatible with performance.now()', async () => {
 
 test('that capture is compatible with setInterval()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -253,7 +265,7 @@ test('that capture is compatible with setInterval()', async () => {
 
 test('that capture is compatible with setTimeout()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -272,7 +284,7 @@ test('that capture is compatible with setTimeout()', async () => {
 
 test('that capture is compatible with requestAnimationFrame()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -308,7 +320,7 @@ test('that capture is compatible with requestAnimationFrame()', async () => {
 
 test('that capture is compatible with bound window.requestAnimationFrame()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -345,7 +357,7 @@ test('that capture is compatible with bound window.requestAnimationFrame()', asy
 
 test('that inactive capture is compatible with setInterval()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -368,7 +380,7 @@ test('that inactive capture is compatible with setInterval()', async () => {
 
 test('that inactive capture is compatible with setTimeout()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
@@ -391,7 +403,7 @@ test('that inactive capture is compatible with setTimeout()', async () => {
 
 test('that inactive capture is compatible with requestAnimationFrame()', async () => {
   browser = await launch({
-    executablePath: executablePath(),
+    executablePath: executablePath({ headless: 'shell' }),
     args: PUPPETEER_LAUNCH_ARGS
   })
   const page = await browser.newPage()
