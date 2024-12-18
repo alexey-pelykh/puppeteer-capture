@@ -30,7 +30,7 @@ const { capture, launch } = require('puppeteer-capture')
     waitUntil: 'networkidle0',
   })
   await recorder.start('capture.mp4')
-  await page.waitForTimeout(1000)
+  await recorder.waitForTimeout(1000)
   await recorder.stop()
   await recorder.detach()
   await browser.close()
@@ -43,10 +43,15 @@ The browser is running in a deterministic mode, thus the time flow is not real t
 time within the page's timeline, `PuppeteerCapture.waitForTimeout()` must be used:
 
 ```js
-await page.waitForTimeout(1000)
+await recorder.waitForTimeout(1000)
 ```
 
 ## Known Issues
+
+### `--headless=new` is not supported
+
+Sadly, [it is so](https://issues.chromium.org/issues/361863270#comment2). Starting with Puppeteer v22, `--headless=new`
+is used by default so the plugin overrides with `--headless=old`.
 
 ### Bad Chrome versions
 
@@ -72,7 +77,7 @@ The exact origin of the issue is not yet known, yet it's likely to be related to
 
 Calling `page.setViewport()` before starting the capture behaves the same, yet calling it _after_ starting the capture
 works yet not always. Thus it's safe to assume that there's some sort of race condition, since adding
-`page.waitForTimeout(100)` just before setting the viewport workarounds the issue.
+`recorder.waitForTimeout(100)` just before setting the viewport workarounds the issue.
 
 Also it should be taken into account that since frame size is going to change over the time of the recording, frame size
 autodetection will fail. To workaround this issue, frame size have to be specified:
@@ -81,8 +86,8 @@ autodetection will fail. To workaround this issue, frame size have to be specifi
 const recorder = await capture(page, {
   size: `${viewportWidth}x${viewportHeight}`,
 })
-await recorder.start('capture.mp4', { waitForTimeout: false })
-await page.waitForTimeout(100)
+await recorder.start('capture.mp4', { waitForFirstFrame: false })
+await recorder.waitForTimeout(100)
 await page.setViewport({
   width: viewportWidth,
   height: viewportHeight,
@@ -104,15 +109,6 @@ await page.setViewport({
   deviceScaleFactor: 1.0,
 })
 ```
-
-### `waitForTimeout()` won't work
-
-The `Page.waitForTimeout()` method implementation essentially forwards the call to the `Frame.waitForTimeout()` on the
-`page.mainFrame()`. The latter is implemented via `setTimeout()`, thus can not work in deterministic mode at all.
-
-To workaround this issue, there's a `PuppeteerCapture.waitForTimeout()` that waits for the timeout in the timeline of
-the captured page, which is not real time at all. For convenience, while capturing is active, the page's
-`waitForTimeout()` becomes a wrapper for `PuppeteerCapture.waitForTimeout()`.
 
 ### Multiple `start()`/`stop()` fail
 

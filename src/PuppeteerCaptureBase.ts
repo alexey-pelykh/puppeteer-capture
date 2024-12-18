@@ -40,7 +40,6 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
   protected _ffmpegStarted: Promise<void> | null
   protected _ffmpegExited: Promise<void> | null
   protected _ffmpegExitedResolve: (() => void) | null
-  protected _pageWaitForTimeout: ((milliseconds: number) => Promise<void>) | null
   protected _isCapturing: boolean
 
   public constructor (options?: PuppeteerCaptureOptions) {
@@ -73,7 +72,6 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._ffmpegStarted = null
     this._ffmpegExited = null
     this._ffmpegExitedResolve = null
-    this._pageWaitForTimeout = null
     this._isCapturing = false
   }
 
@@ -235,11 +233,6 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     this._ffmpegStream.run()
     await this._ffmpegStarted
 
-    this._pageWaitForTimeout = this._page.waitForTimeout
-    this._page.waitForTimeout = async (milliseconds: number): Promise<void> => {
-      await this.waitForTimeout(milliseconds)
-    }
-
     this._isCapturing = true
     this.emit('captureStarted')
 
@@ -313,10 +306,6 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
 
     if (this._target != null) {
       this._target = null
-    }
-
-    if (this._pageWaitForTimeout != null) {
-      this._page.waitForTimeout = this._pageWaitForTimeout
     }
 
     this._page.off('close', this._onPageClose)
