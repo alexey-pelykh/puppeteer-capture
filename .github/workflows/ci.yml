@@ -158,6 +158,12 @@ jobs:
         run: |
           echo "PUPPETEER_BROWSER_REVISION=113.0.5672.63" >> $GITHUB_ENV
 
+      - name: Cache Puppeteer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer/
+          key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ matrix.puppeteer-version }}
+
       - name: Install Puppeteer ${{ matrix.puppeteer-version }}
         run: npm install 'puppeteer@${{ matrix.puppeteer-version }}' 'puppeteer-core@${{ matrix.puppeteer-version }}'
 
