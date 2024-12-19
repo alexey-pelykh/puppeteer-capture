@@ -23,7 +23,7 @@ jobs:
           - lts/jod
 
     env:
-      PUPPETEER_VERSION: 23.11.0
+      PUPPETEER_VERSION: 23.11.1
 
     steps:
 
@@ -83,7 +83,7 @@ jobs:
           - windows-latest
         puppeteer-version:
           - '23.10.4'
-          - '23.11.0'
+          - '23.11.1'
 
     steps:
 
