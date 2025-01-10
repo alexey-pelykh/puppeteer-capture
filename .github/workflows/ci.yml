@@ -16,8 +16,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
-          - windows-latest
+          - ubuntu-22.04
+          - windows-2022
         node-version:
           - lts/iron
           - lts/jod
@@ -79,8 +79,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
-          - windows-latest
+          - ubuntu-22.04
+          - windows-2022
         puppeteer-version:
           - '23.10.4'
           - '23.11.1'
@@ -135,7 +135,7 @@ jobs:
         run: npm run test
 
   github-pages:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     permissions:
       contents: read
@@ -164,7 +164,7 @@ jobs:
           path: build/gh-pages
 
   publish-github-pages:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     permissions:
       contents: read
