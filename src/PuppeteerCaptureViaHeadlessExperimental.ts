@@ -80,7 +80,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   protected override async _attach (page: PuppeteerPage): Promise<void> {
     PuppeteerCaptureViaHeadlessExperimental.validateBrowserArgs(page.browser())
 
-    const session = await page.target().createCDPSession()
+    const session = await page.createCDPSession()
 
     // NOTE: For some reason, page.client() has to be used instead of newly created session
     const onNewDocumentScript = (await this.getPageClient(page).send('Page.addScriptToEvaluateOnNewDocument', {
@@ -171,8 +171,16 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
   protected override async onPostCaptureStarted (): Promise<void> {
     const page = this._page
+    const pageConnection = this._page == null ? null : this.getPageClient(this._page)?.connection()
     const session = this._session
-    if (page == null || this.getPageClient(page)?.connection() == null || session?.connection() == null) {
+    const sessionConnection = session?.connection()
+    if (page == null || pageConnection == null || session == null || sessionConnection == null) {
+      return
+    }
+    if ('_closed' in pageConnection && pageConnection._closed === true) {
+      return
+    }
+    if ('_closed' in sessionConnection && sessionConnection._closed === true) {
       return
     }
 
@@ -187,12 +195,23 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
   protected override async onPostCaptureStopped (): Promise<void> {
     const page = this._page
+    const pageConnection = this._page == null ? null : this.getPageClient(this._page)?.connection()
     const session = this._session
-    if (page == null || this.getPageClient(page)?.connection() == null || session?.connection() == null) {
+    const sessionConnection = session?.connection()
+    if (page == null || pageConnection == null || session == null || sessionConnection == null) {
+      return
+    }
+    if ('_closed' in pageConnection && pageConnection._closed === true) {
+      return
+    }
+    if ('_closed' in sessionConnection && sessionConnection._closed === true) {
       return
     }
 
     for (const frame of page.frames()) {
+      if (frame.detached) {
+        continue
+      }
       await frame.evaluate(`${this._injected}.deactivate()`)
       await frame.evaluate(this._ejector)
     }
