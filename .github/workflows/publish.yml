@@ -9,7 +9,7 @@ jobs:
   package:
     runs-on: ubuntu-24.04
     env:
-      PUPPETEER_VERSION: 24.2.1
+      PUPPETEER_VERSION: 24.3.0
     steps:
 
       - name: Checkout
