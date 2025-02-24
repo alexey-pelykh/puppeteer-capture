@@ -65,13 +65,6 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   }
 
   protected getPageClient (page: PuppeteerPage): PuppeteerCDPSession {
-    // Before puppeteer 14.4.0, the internal method was client()
-    if ('client' in page) {
-      // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
-      // @ts-ignore
-      return page.client()
-    }
-
     // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
     // @ts-ignore
     return page._client()
@@ -171,16 +164,8 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
   protected override async onPostCaptureStarted (): Promise<void> {
     const page = this._page
-    const pageConnection = this._page == null ? null : this.getPageClient(this._page)?.connection()
     const session = this._session
-    const sessionConnection = session?.connection()
-    if (page == null || pageConnection == null || session == null || sessionConnection == null) {
-      return
-    }
-    if ('_closed' in pageConnection && pageConnection._closed === true) {
-      return
-    }
-    if ('_closed' in sessionConnection && sessionConnection._closed === true) {
+    if (page == null || this.getPageClient(page).detached || session == null || session.detached) {
       return
     }
 
@@ -195,16 +180,8 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
   protected override async onPostCaptureStopped (): Promise<void> {
     const page = this._page
-    const pageConnection = this._page == null ? null : this.getPageClient(this._page)?.connection()
     const session = this._session
-    const sessionConnection = session?.connection()
-    if (page == null || pageConnection == null || session == null || sessionConnection == null) {
-      return
-    }
-    if ('_closed' in pageConnection && pageConnection._closed === true) {
-      return
-    }
-    if ('_closed' in sessionConnection && sessionConnection._closed === true) {
+    if (page == null || this.getPageClient(page).detached || session == null || session.detached) {
       return
     }
 
