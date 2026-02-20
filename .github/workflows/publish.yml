@@ -46,14 +46,14 @@ jobs:
           echo "npm_config_cache=$(npm config get cache)" >> "$GITHUB_OUTPUT"
 
       - name: Cache npm packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ steps.get-npm-cache.outputs.npm_config_cache }}
           key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
 
       - name: Cache Puppeteer
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/puppeteer/
           key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ env.PUPPETEER_VERSION }}
@@ -101,14 +101,14 @@ jobs:
           echo "npm_config_cache=$(npm config get cache)" >> "$GITHUB_OUTPUT"
 
       - name: Cache npm packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ steps.get-npm-cache.outputs.npm_config_cache }}
           key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
 
       - name: Cache Puppeteer
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/puppeteer/
           key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ env.PUPPETEER_VERSION }}
