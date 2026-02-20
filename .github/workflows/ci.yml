@@ -141,11 +141,11 @@ jobs:
           path: ${{ steps.pptr-cache.outputs.path }}
           key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ matrix.puppeteer-version }}
 
-      - name: Install Puppeteer ${{ matrix.puppeteer-version }}
-        run: npm install 'puppeteer@${{ matrix.puppeteer-version }}' 'puppeteer-core@${{ matrix.puppeteer-version }}'
-
       - name: Install dependencies
         run: npm ci
+
+      - name: Install Puppeteer ${{ matrix.puppeteer-version }}
+        run: npm install --no-save 'puppeteer@${{ matrix.puppeteer-version }}' 'puppeteer-core@${{ matrix.puppeteer-version }}'
 
       - name: Verify the Puppeteer and Puppeteer-Core versions
         run: |
