@@ -107,6 +107,15 @@ Do **not** add issue numbers to commit messages. Use `Closes #N` in PR body inst
 2. Create GitHub Release (tag = semver version, e.g. `1.13.0`)
 3. Publish workflow validates tag, runs lint + test, then publishes with provenance
 
+**Release notes format** (use GitHub's "Generate release notes" style):
+
+```markdown
+## What's Changed
+* (type) description by @author in https://github.com/alexey-pelykh/puppeteer-capture/pull/N
+
+**Full Changelog**: https://github.com/alexey-pelykh/puppeteer-capture/compare/PREV_TAG...NEW_TAG
+```
+
 **Publishing**: Uses OIDC trusted publishing (no `NPM_TOKEN`). The `npm-publish` GitHub environment
 provides deployment protection. Provenance attestation links the published package to its source commit.
 
