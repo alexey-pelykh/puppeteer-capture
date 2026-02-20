@@ -104,10 +104,15 @@ Do **not** add issue numbers to commit messages. Use `Closes #N` in PR body inst
 ## Release Process
 
 1. Ensure `main` is green
-2. Create GitHub Release (tag = version, e.g. `1.13.0`)
-3. Publish workflow stamps version from tag and runs `npm publish`
+2. Create GitHub Release (tag = semver version, e.g. `1.13.0`)
+3. Publish workflow validates tag, runs lint + test, then publishes with provenance
 
-**Required secrets**: `NPM_TOKEN`, `CODECOV_TOKEN`
+**Publishing**: Uses OIDC trusted publishing (no `NPM_TOKEN`). The `npm-publish` GitHub environment
+provides deployment protection. Provenance attestation links the published package to its source commit.
+
+**Required secrets**: `CODECOV_TOKEN`
+
+**Required environments**: `npm-publish` (with deployment protection rules)
 
 ## Platform Constraints
 
@@ -135,7 +140,7 @@ When a new puppeteer version is released, a single atomic commit updates 4 files
 
 ### 3. `.github/workflows/publish.yml`
 
-- Update `PUPPETEER_VERSION` env var to new version
+- Update `PUPPETEER_VERSION` env var in both `validate` and `publish` jobs to new version
 
 ### 4. `package-lock.json`
 
