@@ -8,10 +8,15 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
 
   build:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
 
     strategy:
       matrix:
@@ -50,10 +55,15 @@ jobs:
           key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
 
+      - name: Get Puppeteer cache path
+        id: pptr-cache
+        shell: bash
+        run: echo "path=$(node -e "console.log(require('path').join(require('os').homedir(), '.cache', 'puppeteer'))")" >> "$GITHUB_OUTPUT"
+
       - name: Cache Puppeteer
         uses: actions/cache@v4
         with:
-          path: ~/.cache/puppeteer/
+          path: ${{ steps.pptr-cache.outputs.path }}
           key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ env.PUPPETEER_VERSION }}
 
       - name: Install dependencies
@@ -73,6 +83,7 @@ jobs:
 
   integration:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
 
     needs:
       - build
@@ -116,10 +127,15 @@ jobs:
           key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
 
+      - name: Get Puppeteer cache path
+        id: pptr-cache
+        shell: bash
+        run: echo "path=$(node -e "console.log(require('path').join(require('os').homedir(), '.cache', 'puppeteer'))")" >> "$GITHUB_OUTPUT"
+
       - name: Cache Puppeteer
         uses: actions/cache@v4
         with:
-          path: ~/.cache/puppeteer/
+          path: ${{ steps.pptr-cache.outputs.path }}
           key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ matrix.puppeteer-version }}
 
       - name: Install Puppeteer ${{ matrix.puppeteer-version }}
@@ -141,6 +157,7 @@ jobs:
 
   github-pages:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
 
     permissions:
       contents: read
@@ -170,6 +187,7 @@ jobs:
 
   publish-github-pages:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
 
     concurrency:
       group: pages
