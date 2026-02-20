@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 jobs:
 
   build:
@@ -161,7 +164,6 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
 
     steps:
 
