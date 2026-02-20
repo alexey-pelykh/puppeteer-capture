@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022-2026 Alexey Pelykh
+
 import { PuppeteerCaptureViaHeadlessExperimental } from './PuppeteerCaptureViaHeadlessExperimental'
 
 export class MissingHeadlessExperimentalRequiredArgs extends Error {

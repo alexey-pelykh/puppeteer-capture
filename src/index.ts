@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022-2026 Alexey Pelykh
+
 export { capture } from './capture'
 export { launch } from './launch'
 export { MissingHeadlessExperimentalRequiredArgs as MissingRequiredArgs } from './MissingHeadlessExperimentalRequiredArgs'

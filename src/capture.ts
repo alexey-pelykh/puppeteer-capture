@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022-2026 Alexey Pelykh
+
 import type { Page as PuppeteerPage } from 'puppeteer-core'
 import { PuppeteerCapture } from './PuppeteerCapture'
 import { PuppeteerCaptureOptions } from './PuppeteerCaptureOptions'

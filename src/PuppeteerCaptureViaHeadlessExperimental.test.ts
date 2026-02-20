@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022-2026 Alexey Pelykh
+
 import { setTimeout } from 'node:timers/promises'
 import { executablePath } from 'puppeteer'
 import type { Browser as PuppeteerBrowser } from 'puppeteer-core'

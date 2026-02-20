@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022-2026 Alexey Pelykh
+
 import { PassThrough } from 'stream'
 import { PuppeteerCaptureBase } from './PuppeteerCaptureBase'
 
