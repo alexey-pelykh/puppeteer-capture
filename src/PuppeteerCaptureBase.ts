@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022-2026 Alexey Pelykh
+
 import { Mutex } from 'async-mutex'
 import ffmpeg, { FfmpegCommand, setFfmpegPath } from 'fluent-ffmpeg'
 import { mkdir } from 'fs/promises'
