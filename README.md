@@ -55,6 +55,147 @@ await browser.close()
 | Time control | Full (virtual clock) | None | None |
 | Platform | Linux, Windows | All | All |
 
+## API Reference
+
+### `launch(options?)`
+
+Launches a browser configured for deterministic capture.
+
+```ts
+import { launch } from 'puppeteer-capture'
+
+const browser = await launch()
+```
+
+- **`options`** — Optional `PuppeteerLaunchOptions` from `puppeteer-core`. The `headless` option is
+  overridden to `'shell'` and the [required Chrome arguments](#required-chrome-arguments) are appended
+  to `args` automatically.
+- **Returns** `Promise<PuppeteerBrowser>`
+
+### `capture(page, options?)`
+
+Creates a `PuppeteerCapture` instance for the given page.
+
+```ts
+import { capture } from 'puppeteer-capture'
+
+const recorder = await capture(page)
+```
+
+- **`page`** — A `PuppeteerPage` to capture.
+- **`options`** — Optional [`PuppeteerCaptureOptions`](#puppeteercaptureoptions) extended with:
+  - **`attach`** (`boolean`, default: `true`) — When `false`, the recorder is created without
+    attaching to the page. Call `recorder.attach(page)` later.
+- **Returns** `Promise<PuppeteerCapture>`
+
+### `PuppeteerCaptureOptions`
+
+Options passed to [`capture()`](#capturepage-options).
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `fps` | `number` | `60` | Frames per second |
+| `size` | `string` | — | Output size in ffmpeg notation (e.g. `'1280x720'`) |
+| `format` | `(ffmpeg: FfmpegCommand) => Promise<void>` | `PuppeteerCaptureFormat.MP4()` | Output format configurator |
+| `ffmpeg` | `string` | — | Path to the ffmpeg binary (overrides auto-detection) |
+| `customFfmpegConfig` | `(ffmpeg: FfmpegCommand) => Promise<void>` | — | Additional ffmpeg configuration callback applied after `format` |
+
+### `PuppeteerCaptureStartOptions`
+
+Options passed to [`recorder.start()`](#methods).
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `waitForFirstFrame` | `boolean` | `true` | Whether `start()` waits for the first frame before resolving |
+| `dropCapturedFrames` | `boolean` | `false` | When `true`, frames are emitted via events but not written to the output |
+
+### `PuppeteerCapture`
+
+The main interface returned by [`capture()`](#capturepage-options).
+
+#### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `page` | `Page \| null` | The attached page, or `null` if detached |
+| `isCapturing` | `boolean` | Whether capture is in progress |
+| `captureTimestamp` | `number` | Current virtual timestamp (ms) since capture start |
+| `capturedFrames` | `number` | Total frames captured since last `start()` |
+| `dropCapturedFrames` | `boolean` | Whether captured frames are dropped (read/write) |
+| `recordedFrames` | `number` | Total frames written to the output |
+
+#### Methods
+
+**`attach(page)`** — Attaches the recorder to a page. Required only when
+[`capture()`](#capturepage-options) was called with `{ attach: false }`.
+Throws if already attached.
+
+**`detach()`** — Detaches from the current page. Throws if not attached.
+
+**`start(target, options?)`** — Starts capturing frames.
+- **`target`** — A file path (`string`) or a `Writable` stream.
+- **`options`** — Optional [`PuppeteerCaptureStartOptions`](#puppeterecapturestartoptions).
+
+When `target` is a file path, parent directories are created automatically.
+
+**`stop()`** — Stops capture and waits for ffmpeg to finalize the output.
+
+**`waitForTimeout(milliseconds)`** — Advances the page's virtual timeline by the given number
+of milliseconds. Can only be called while capturing. See [Time Flow](#time-flow).
+
+**`on(event, listener)`** — Subscribes to a capture [event](#events).
+
+#### Events
+
+| Event | Listener Signature | Description |
+|-------|--------------------|-------------|
+| `captureStarted` | `() => void` | Capture was started |
+| `frameCaptured` | `(index: number, timestamp: number, data: Buffer) => void` | A frame was captured |
+| `frameCaptureFailed` | `(reason?: any) => void` | Frame capture failed |
+| `frameRecorded` | `(index: number, timestamp: number, data: Buffer) => void` | A frame was written to the output |
+| `captureStopped` | `() => void` | Capture was stopped |
+
+### `PuppeteerCaptureFormat`
+
+Format configurators for [`PuppeteerCaptureOptions.format`](#puppeterecaptureoptions).
+
+**`PuppeteerCaptureFormat.MP4(preset?, videoCodec?)`**
+
+- **`preset`** — x264 encoding preset (default: `'ultrafast'`). One of: `'ultrafast'`,
+  `'superfast'`, `'veryfast'`, `'faster'`, `'fast'`, `'medium'`, `'slow'`, `'slower'`, `'veryslow'`.
+- **`videoCodec`** — Video codec (default: `'libx264'`).
+- **Returns** a format configurator function.
+
+```ts
+import { capture, PuppeteerCaptureFormat } from 'puppeteer-capture'
+
+const recorder = await capture(page, {
+  format: PuppeteerCaptureFormat.MP4('medium', 'libx264')
+})
+```
+
+### Error Classes
+
+**`NotChromeHeadlessShell`** — Thrown when the browser is not `chrome-headless-shell`.
+Use [`launch()`](#launchoptions) to ensure the correct binary.
+
+**`MissingRequiredArgs`** — Thrown when the browser is missing one or more required Chrome
+arguments. Use [`launch()`](#launchoptions) to add them automatically.
+
+#### Required Chrome Arguments
+
+The following arguments are required and are added automatically by [`launch()`](#launchoptions):
+
+- `--deterministic-mode`
+- `--enable-begin-frame-control`
+- `--disable-new-content-rendering-timeout`
+- `--run-all-compositor-stages-before-draw`
+- `--disable-threaded-animation`
+- `--disable-threaded-scrolling`
+- `--disable-checker-imaging`
+- `--disable-image-animation-resync`
+- `--enable-surface-synchronization`
+
 ## Platform Risk: `HeadlessExperimental` Dependency
 
 This library depends entirely on Chrome's
@@ -125,16 +266,6 @@ within the page's timeline, use `PuppeteerCapture.waitForTimeout()`:
 ```js
 await recorder.waitForTimeout(1000)
 ```
-
-## Events
-
-`PuppeteerCapture` emits the following events:
-
-- `captureStarted` — capture was successfully started
-- `frameCaptured` — a frame was captured
-- `frameCaptureFailed` — frame capture failed
-- `frameRecorded` — a frame has been submitted to ffmpeg
-- `captureStopped` — capture was stopped
 
 ## Dependencies
 
