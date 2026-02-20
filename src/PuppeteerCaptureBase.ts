@@ -55,7 +55,7 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     if (this._options.fps == null) {
       throw new Error('options.fps needs to be set')
     }
-    if (this._options.fps < 0) {
+    if (this._options.fps <= 0) {
       throw new Error(`options.fps can not be set to ${this._options.fps}`)
     }
     this._frameInterval = 1000.0 / this._options.fps
