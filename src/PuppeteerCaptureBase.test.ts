@@ -399,7 +399,7 @@ describe('findFfmpeg', () => {
     expect(result).toBe('/usr/bin/ffmpeg')
   })
 
-  test('falls back to @ffmpeg-installer when which fails', async () => {
+  test('falls back to ffmpeg-static when which fails', async () => {
     delete process.env.FFMPEG
     const which = require('which') as jest.Mock // eslint-disable-line @typescript-eslint/no-var-requires
     which.mockRejectedValueOnce(new Error('not found'))
@@ -413,7 +413,7 @@ describe('findFfmpeg', () => {
 
     jest.resetModules()
     jest.doMock('which', () => jest.fn().mockRejectedValue(new Error('not found')))
-    jest.doMock('@ffmpeg-installer/ffmpeg', () => { throw new Error('Cannot find module') })
+    jest.doMock('ffmpeg-static', () => { throw new Error('Cannot find module') })
 
     const { PuppeteerCaptureBase: FreshBase } = require('./PuppeteerCaptureBase') // eslint-disable-line @typescript-eslint/no-var-requires
     await expect(FreshBase.findFfmpeg()).rejects.toThrow(

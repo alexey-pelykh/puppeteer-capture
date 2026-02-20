@@ -403,10 +403,10 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     } catch (e) { }
 
     try {
-      const ffmpeg = require('@ffmpeg-installer/ffmpeg') // eslint-disable-line @typescript-eslint/no-var-requires
-      return ffmpeg.path
+      const ffmpegPath = require('ffmpeg-static') // eslint-disable-line @typescript-eslint/no-var-requires
+      return ffmpegPath
     } catch (e) { }
 
-    throw new Error('ffmpeg not available: specify FFMPEG environment variable, or make it available via PATH, or add @ffmpeg-installer/ffmpeg to the project')
+    throw new Error('ffmpeg not available: specify FFMPEG environment variable, or make it available via PATH, or add ffmpeg-static to the project')
   }
 }
