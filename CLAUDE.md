@@ -16,19 +16,19 @@ src/
 ├── index.ts                → Public API exports (capture, launch)
 ├── capture.ts              → capture() factory function
 ├── launch.ts               → launch() wrapper (enforces chrome-headless-shell)
-├── PuppeteerCapture.ts     → Main class (delegates to implementation)
+├── PuppeteerCapture.ts     → Main interface (public API contract)
 ├── PuppeteerCaptureBase.ts → Base class (event emitter, lifecycle)
 ├── PuppeteerCaptureViaHeadlessExperimental.ts → CDP-based implementation
 ├── PuppeteerCaptureOptions.ts      → Capture options interface
 ├── PuppeteerCaptureStartOptions.ts → Start options interface
-├── PuppeteerCaptureFormat.ts       → Output format enum
+├── PuppeteerCaptureFormat.ts       → Output format factory functions
 ├── PuppeteerCaptureEvents.ts       → Event type definitions
 ├── MissingHeadlessExperimentalRequiredArgs.ts → Error class
 └── NotChromeHeadlessShell.ts                  → Error class
 ```
 
 **Key classes**:
-- `PuppeteerCapture` — Main class, created via `capture(page, options?)`
+- `PuppeteerCapture` — Main interface, created via `capture(page, options?)`
 - `PuppeteerCaptureViaHeadlessExperimental` — Implementation using CDP's `HeadlessExperimental.beginFrame`
 
 **Dependencies**:
