@@ -124,9 +124,10 @@ describe('constructor', () => {
     )
   })
 
-  test('accepts fps of 0', () => {
-    const capture = new TestCapture({ fps: 0 })
-    expect(capture['_frameInterval']).toBe(Infinity) // eslint-disable-line @typescript-eslint/dot-notation
+  test('throws when fps is zero', () => {
+    expect(() => new TestCapture({ fps: 0 })).toThrow(
+      'options.fps can not be set to 0'
+    )
   })
 })
 
