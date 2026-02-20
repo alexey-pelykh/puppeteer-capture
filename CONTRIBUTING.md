@@ -25,7 +25,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 ## Prerequisites
 
 - **Node.js** >=20.18
-- **ffmpeg** — resolved via `FFMPEG` env var, `PATH`, or the optional `@ffmpeg-installer/ffmpeg` package
+- **ffmpeg** — resolved via `FFMPEG` env var, `PATH`, or the optional `ffmpeg-static` package
 
 ## Platform Constraints
 

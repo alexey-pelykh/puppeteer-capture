@@ -44,7 +44,7 @@
     "which": "^3.0.0 || ^4.0.0 || ^5.0.0"
   },
   "optionalDependencies": {
-    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+    "ffmpeg-static": "^5.2.0"
   },
   "peerDependencies": {
     "puppeteer-core": "^24.3.0 || ^24.4.0 || ^24.5.0 || ^24.6.0"

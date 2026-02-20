@@ -35,7 +35,7 @@ src/
 - `fluent-ffmpeg` — Video encoding
 - `async-mutex` — Concurrency control for frame capture
 - `which` — ffmpeg binary resolution
-- `@ffmpeg-installer/ffmpeg` (optional) — Bundled ffmpeg fallback
+- `ffmpeg-static` (optional) — Bundled ffmpeg fallback
 
 ## Build Commands
 
@@ -118,7 +118,7 @@ provides deployment protection. Provenance attestation links the published packa
 
 - **macOS not supported** — Chrome's HeadlessExperimental is not available on macOS
 - **`--headless=new` not supported** — Plugin enforces `chrome-headless-shell` binary
-- **Tests require ffmpeg** — Resolved via `FFMPEG` env var, `PATH`, or `@ffmpeg-installer/ffmpeg`
+- **Tests require ffmpeg** — Resolved via `FFMPEG` env var, `PATH`, or `ffmpeg-static`
 
 ## Puppeteer Version Bump Procedure
 
