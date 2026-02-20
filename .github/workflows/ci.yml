@@ -171,6 +171,10 @@ jobs:
   publish-github-pages:
     runs-on: ubuntu-24.04
 
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
     permissions:
       contents: read
       pages: write
