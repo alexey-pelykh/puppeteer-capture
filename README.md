@@ -55,6 +55,68 @@ await browser.close()
 | Time control | Full (virtual clock) | None | None |
 | Platform | Linux, Windows | All | All |
 
+## Platform Risk: `HeadlessExperimental` Dependency
+
+This library depends entirely on Chrome's
+[`HeadlessExperimental`](https://chromedevtools.github.io/devtools-protocol/tot/HeadlessExperimental/) CDP domain
+— specifically the
+[`beginFrame`](https://chromedevtools.github.io/devtools-protocol/tot/HeadlessExperimental/#method-beginFrame)
+method — for deterministic frame capture. This is the only mechanism in Chrome that provides compositor-level frame
+scheduling, which is what enables frame-perfect, reproducible video output.
+
+### Current status
+
+- **`beginFrame`** is **not deprecated** and remains actively implemented in the
+  [Chromium source](https://chromium.googlesource.com/chromium/src/+/main/headless/lib/browser/protocol/headless_handler.cc).
+- **`enable`/`disable`** are marked deprecated in the
+  [protocol definition](https://chromium.googlesource.com/chromium/src/+/main/third_party/blink/public/devtools_protocol/domains/HeadlessExperimental.pdl)
+  (they are no-ops and have no functional impact).
+- The domain is labeled **Experimental**, meaning it can change without notice.
+- `beginFrame` is exclusive to
+  [`chrome-headless-shell`](https://developer.chrome.com/blog/chrome-headless-shell) (the old headless architecture).
+  It is **not available** in `--headless=new`.
+
+### Risk assessment
+
+| Timeframe | Risk | Rationale |
+|-----------|------|-----------|
+| Near-term (0–12 months) | **Low** | `beginFrame` is not deprecated; implementation receives maintenance commits; `chrome-headless-shell` ships with every Chrome release. |
+| Medium-term (1–3 years) | **Moderate** | The "Experimental" label has persisted since inception without graduating to stable. No public commitment to long-term `chrome-headless-shell` maintenance exists. |
+| Long-term (3+ years) | **Moderate–High** | Chrome's strategic direction favors `--headless=new`. If `chrome-headless-shell` is eventually discontinued, `beginFrame` goes with it. |
+
+### Why there is no drop-in alternative
+
+`HeadlessExperimental.beginFrame` is unique because it controls **when** the compositor renders each frame. The
+alternatives — `Page.startScreencast`, `Page.captureScreenshot`, tab capture — all capture frames produced by Chrome's
+own compositor timing, which means:
+
+- Frame timing depends on wall-clock time and system load (non-deterministic).
+- CSS animations, transitions, and compositor-driven effects cannot be synchronized to a virtual timeline.
+- Two runs of the same page may produce different frame counts and visual output.
+
+A partial fallback using `Page.captureScreenshot` with JavaScript time virtualization can achieve determinism for
+JS-driven content but **not** for CSS animations or compositor-driven effects.
+
+### Mitigating factors
+
+- [Remotion](https://www.remotion.dev/) and other ecosystem projects also depend on `chrome-headless-shell` for
+  deterministic rendering, creating broader pressure to maintain the binary.
+- Active Chromium issues (e.g., [#40550372](https://issues.chromium.org/issues/40550372) — making BeginFrameControl
+  work with Viz) indicate ongoing investment, not abandonment.
+- Chromium's deprecation process typically involves long warning periods and migration paths.
+
+### Monitoring
+
+To track changes to this dependency:
+
+- [Chromium `HeadlessExperimental.pdl`](https://chromium.googlesource.com/chromium/src/+/main/third_party/blink/public/devtools_protocol/domains/HeadlessExperimental.pdl)
+  — protocol definition (watch for deprecation annotations on `beginFrame`)
+- [Chromium `headless_handler.cc`](https://chromium.googlesource.com/chromium/src/+/main/headless/lib/browser/protocol/headless_handler.cc)
+  — implementation (watch for removal or functional changes)
+- [Chrome DevTools Protocol changelog](https://github.com/ChromeDevTools/devtools-protocol/blob/master/changelog.md)
+- [headless-dev mailing list](https://groups.google.com/a/chromium.org/g/headless-dev) — discussions on headless mode
+  future
+
 ## Time Flow
 
 The browser runs in deterministic mode, so the time flow is not real time. To wait for a certain amount of time
