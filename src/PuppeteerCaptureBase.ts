@@ -95,8 +95,8 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     return this._dropCapturedFrames
   }
 
-  public set dropCapturedFrames (dropCaptiuredFrames: boolean) {
-    this._dropCapturedFrames = dropCaptiuredFrames
+  public set dropCapturedFrames (value: boolean) {
+    this._dropCapturedFrames = value
   }
 
   public get recordedFrames (): number {
