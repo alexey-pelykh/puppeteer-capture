@@ -64,10 +64,28 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
     }
   }
 
+  /**
+   * Returns the page's internal CDP client. This accesses Puppeteer's private
+   * `_client()` method because `Page.addScriptToEvaluateOnNewDocument` and
+   * `Page.removeScriptToEvaluateOnNewDocument` must be sent on the page's own
+   * CDP session — a session created via `page.createCDPSession()` operates on
+   * a separate target and cannot manage page-level lifecycle scripts.
+   *
+   * This private API has broken before (see Issue #7, where `page.client()`
+   * was renamed to `page._client()`). The integration test matrix covering
+   * multiple Puppeteer versions helps detect such changes early.
+   */
   protected getPageClient (page: PuppeteerPage): PuppeteerCDPSession {
-    // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
-    // @ts-ignore
-    return page._client()
+    try {
+      // @ts-expect-error — _client() is a private Puppeteer API not exposed in type declarations
+      return page._client()
+    } catch {
+      throw new Error(
+        'Failed to access the page\'s internal CDP client via page._client(). ' +
+        'This may indicate an incompatible Puppeteer version. ' +
+        'Please file an issue at https://github.com/alexey-pelykh/puppeteer-capture/issues'
+      )
+    }
   }
 
   protected override async _attach (page: PuppeteerPage): Promise<void> {
