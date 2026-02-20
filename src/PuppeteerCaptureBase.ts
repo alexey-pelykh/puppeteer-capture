@@ -141,8 +141,8 @@ export abstract class PuppeteerCaptureBase extends EventEmitter implements Puppe
     if (options.waitForFirstFrame == null) {
       throw new Error('options.waitForFirstFrame can not be null or undefined')
     }
-    if (options.waitForFirstFrame == null) {
-      throw new Error('options.waitForFirstFrame can not be null or undefined')
+    if (options.dropCapturedFrames == null) {
+      throw new Error('options.dropCapturedFrames can not be null or undefined')
     }
 
     if (this._page == null) {
