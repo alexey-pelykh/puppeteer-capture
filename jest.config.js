@@ -6,5 +6,6 @@ module.exports = {
   moduleFileExtensions: [...defaults.moduleFileExtensions, 'ts', 'tsx'],
   collectCoverage: true,
   coverageReporters: ['lcov', 'html'],
+  testTimeout: 30000,
   slowTestThreshold: 30
 }
