@@ -38,6 +38,7 @@
     "video recorder"
   ],
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "dependencies": {
     "async-mutex": "^0.5.0",
     "fluent-ffmpeg": "^2.1.3",
