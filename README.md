@@ -275,7 +275,7 @@ ffmpeg is resolved in the following order:
 
 1. `FFMPEG` environment variable pointing to the executable
 2. The executable available via `PATH`
-3. Via `@ffmpeg-installer/ffmpeg`, if installed as a dependency
+3. Via `ffmpeg-static`, if installed as a dependency
 
 ## Known Issues
 
