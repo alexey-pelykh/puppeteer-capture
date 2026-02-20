@@ -72,28 +72,28 @@ test('that capture works in headless mode', async () => {
   expect(capture.capturedFrames).toBeGreaterThan(1)
 })
 
-// test('that capture works repeatedly in headless mode', async () => {
-//   browser = await launch({
-//     executablePath: executablePath({ headless: 'shell' }),
-//     args: PUPPETEER_LAUNCH_ARGS
-//   })
-//   const page = await browser.newPage()
-//   const capture = new PuppeteerCaptureViaHeadlessExperimental()
-//   await capture.attach(page)
-//   await page.goto('about:blank')
+test('that capture works repeatedly in headless mode', async () => {
+  browser = await launch({
+    executablePath: executablePath({ headless: 'shell' }),
+    args: PUPPETEER_LAUNCH_ARGS
+  })
+  const page = await browser.newPage()
+  const capture = new PuppeteerCaptureViaHeadlessExperimental()
+  await capture.attach(page)
+  await page.goto('about:blank')
 
-//   const stream1 = new PassThrough()
-//   await capture.start(stream1)
-//   await capture.waitForTimeout(32)
-//   await capture.stop()
-//   expect(capture.capturedFrames).toBeGreaterThan(1)
+  const stream1 = new PassThrough()
+  await capture.start(stream1)
+  await capture.waitForTimeout(32)
+  await capture.stop()
+  expect(capture.capturedFrames).toBeGreaterThan(1)
 
-//   const stream2 = new PassThrough()
-//   await capture.start(stream2)
-//   await capture.waitForTimeout(32)
-//   await capture.stop()
-//   expect(capture.capturedFrames).toBeGreaterThan(1)
-// })
+  const stream2 = new PassThrough()
+  await capture.start(stream2)
+  await capture.waitForTimeout(32)
+  await capture.stop()
+  expect(capture.capturedFrames).toBeGreaterThan(1)
+})
 
 test('that capture works with custom viewport size', async () => {
   browser = await launch({

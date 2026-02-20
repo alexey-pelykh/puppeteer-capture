@@ -62,10 +62,6 @@ await page.setViewport({
 })
 ```
 
-### Multiple `start()`/`stop()` fail
-
-It's unclear why, yet after disabling and re-enabling the capture, callbacks from browser stop arriving.
-
 ### Time-related functions are affected
 
 The following functions have to be overridden with injected versions:

@@ -46,6 +46,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
   protected readonly _onSessionDisconnected: () => void
   protected _session: PuppeteerCDPSession | null
   protected _onNewDocumentScript: Protocol.Page.ScriptIdentifier | null
+  protected _frameTimeTicks: number
 
   public constructor (options?: PuppeteerCaptureOptions) {
     super(options)
@@ -58,6 +59,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
     this._session = null
     this._onNewDocumentScript = null
+    this._frameTimeTicks = 0
 
     if (process.platform === 'darwin') {
       throw new Error('MacOS is not supported by HeadlessExperimental.BeginFrame')
@@ -90,6 +92,8 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
   protected override async _attach (page: PuppeteerPage): Promise<void> {
     PuppeteerCaptureViaHeadlessExperimental.validateBrowserArgs(page.browser())
+
+    this._frameTimeTicks = 0
 
     const session = await page.createCDPSession()
 
@@ -139,12 +143,13 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
   protected doRequestFrameCapture (page: PuppeteerPage, session: PuppeteerCDPSession): void {
     const captureTimestamp = this._captureTimestamp
+    const frameTimeTicks = this._frameTimeTicks
     const frameInterval = this._frameInterval
     this._frameBeingCaptured = Promise.all(page.frames().map(async (frame) => {
       await frame.evaluate(`${this._injected}.process(${captureTimestamp})`)
     })).then(async () => {
       return await session.send('HeadlessExperimental.beginFrame', {
-        frameTimeTicks: captureTimestamp,
+        frameTimeTicks,
         interval: frameInterval,
         noDisplayUpdates: false,
         screenshot: { format: 'png' }
@@ -166,6 +171,7 @@ export class PuppeteerCaptureViaHeadlessExperimental extends PuppeteerCaptureBas
 
         if (this._isCapturing) {
           this._captureTimestamp = captureTimestamp + frameInterval
+          this._frameTimeTicks = frameTimeTicks + frameInterval
           setTimeout(this._requestFrameCapture, 0)
         }
       },
