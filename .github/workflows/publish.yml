@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
 
     env:
-      PUPPETEER_VERSION: 24.31.0
+      PUPPETEER_VERSION: 24.32.1
 
     steps:
 
@@ -80,7 +80,7 @@ jobs:
       id-token: write
 
     env:
-      PUPPETEER_VERSION: 24.31.0
+      PUPPETEER_VERSION: 24.32.1
 
     steps:
 
