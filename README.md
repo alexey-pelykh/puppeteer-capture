@@ -6,7 +6,6 @@
 [![NPM Version](https://img.shields.io/npm/v/puppeteer-capture)](https://www.npmjs.com/package/puppeteer-capture)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/alexey-pelykh/puppeteer-capture/ci.yml?branch=main)
 ![Codecov](https://img.shields.io/codecov/c/gh/alexey-pelykh/puppeteer-capture)
-![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/alexey-pelykh/puppeteer-capture)
 
 A Puppeteer plugin for capturing page as a video with ultimate quality.
 
