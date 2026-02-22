@@ -89,4 +89,36 @@ like `currentTime` may advance.
 
 This also applies to animated GIFs, which use a separate image animation pipeline.
 
+#### Why this can't be fixed at the CDP level
+
+Research into Chrome's architecture ([#191](https://github.com/alexey-pelykh/puppeteer-capture/issues/191))
+confirmed this is a fundamental gap:
+
+- The **CDP `Media` domain** is observation-only — it monitors player state but has no playback control methods
+- The **CDP `Animation` domain** covers CSS/Web Animations only — `<video>`/`<audio>` are architecturally
+  separate
+- The **media pipeline clock** runs on wall-clock time in headless mode (normally driven by the sound card,
+  which doesn't exist in `chrome-headless-shell`). There is no CDP command or Chrome flag to make it respect
+  virtual time
+- **`video.currentTime` seeking** is asynchronous and frame-approximate — rapid sequential seeks trigger known
+  Chromium bugs and are far too slow for frame-by-frame capture
+
+#### Workarounds
+
+**For exact results**, decode video server-side (e.g., with ffmpeg), extract frames as images, and display
+them as `<img>` elements on a timed sequence — these render deterministically under puppeteer-capture.
+
+**For approximate results**, a seek + canvas pattern can be used in page scripts:
+
+```js
+// On each frame (inside requestAnimationFrame callback):
+video.currentTime = desiredTimeInSeconds
+video.addEventListener('seeked', () => {
+  ctx.drawImage(video, 0, 0)
+}, { once: true })
+```
+
+Note that this approach is **not frame-perfect** — seek accuracy depends on codec keyframe placement,
+audio is not captured, and native video controls are not visible on the canvas.
+
 See [#9](https://github.com/alexey-pelykh/puppeteer-capture/issues/9) for the original report.
