@@ -78,3 +78,15 @@ The injection should happen before page content loads:
 const recorder = await capture(page) // Injection happens here during attach()
 await page.goto('https://google.com') // Possible capture would happen here, thus injected versions would be captured
 ```
+
+### HTML5 `<video>` and `<audio>` elements are not supported
+
+Chrome's media engine operates below the JavaScript and compositor layers that puppeteer-capture controls.
+The virtual time injection affects JS timing APIs, and `HeadlessExperimental.beginFrame` advances the
+compositor clock, but neither mechanism controls the internal media decoder/renderer. As a result,
+`<video>` and `<audio>` elements appear frozen during capture even though JavaScript-observable properties
+like `currentTime` may advance.
+
+This also applies to animated GIFs, which use a separate image animation pipeline.
+
+See [#9](https://github.com/alexey-pelykh/puppeteer-capture/issues/9) for the original report.
