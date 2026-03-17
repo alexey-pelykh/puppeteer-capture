@@ -9,3 +9,7 @@ See [puppeteer-bump-pattern.md](puppeteer-bump-pattern.md) for the detailed chec
 - `package.json` — devDeps pin exact versions; peerDeps use `^major.minor.0` ranges
 - `.github/workflows/ci.yml` — `PUPPETEER_VERSION` env + integration test matrix
 - `.github/workflows/publish.yml` — `PUPPETEER_VERSION` env
+
+## Feedback
+
+See [feedback-puppeteer-bump-one-at-a-time.md](feedback-puppeteer-bump-one-at-a-time.md) — one minor version per commit+release, never skip minors
