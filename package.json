@@ -57,7 +57,7 @@
     "@types/which": "^3.0.4",
     "@types/ws": "^8.5.13",
     "jest": "^30.3.0",
-    "puppeteer": "24.39.1",
+    "puppeteer": "24.40.0",
     "puppeteer-core": "24.39.1",
     "rimraf": "^6.0.1",
     "ts-jest": "^29.2.5",
