@@ -133,18 +133,20 @@ provides deployment protection. Provenance attestation links the published packa
 
 When a new puppeteer version is released, a single atomic commit updates 4 files.
 
-**One minor at a time**: When multiple minor versions are pending (e.g. 24.37 → 24.39), bump one
-minor per commit+release. Never skip intermediate minors. Each minor gets its own commit, push, and
-npm release before proceeding to the next.
+**One (major, minor) at a time**: When multiple (major, minor) combos are pending (e.g. 24.43 → 25.1),
+bump one per commit+release. Never skip intermediates (24.43 → 25.0 → 25.1, not 24.43 → 25.1).
+Exhaust all pending minors of the current major before crossing into the next major. Each
+(major, minor) gets its own commit, push, and npm release before proceeding to the next.
 
 **Commit message**: `(imp) puppeteer v{VERSION}`
 
 ### 1. `package.json`
 
 - **`devDependencies`**: Pin both `puppeteer` and `puppeteer-core` to exact new version (no caret)
-- **`peerDependencies`**: Append `|| ^{major}.{minor}.0` **only on minor bumps**
+- **`peerDependencies`**: Append `|| ^{major}.{minor}.0` on **minor or major bumps**
   - Patch bump (e.g. 24.6.0 → 24.6.1): no peerDeps change (existing `^24.6.0` covers it)
   - Minor bump (e.g. 24.5.0 → 24.6.0): add `|| ^24.6.0`
+  - Major bump (e.g. 24.43.1 → 25.0.2): add `|| ^25.0.0`
 
 ### 2. `.github/workflows/ci.yml`
 
