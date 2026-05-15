@@ -18,9 +18,10 @@ When a new puppeteer version is released, a single commit updates 4 files.
 "puppeteer-core": "{NEW_VERSION}",
 ```
 
-**peerDependencies** — append new `^major.minor.0` range ONLY if the minor version is new:
+**peerDependencies** — append new `^major.minor.0` range when the (major, minor) combo is new:
 - Patch bump (e.g., 24.6.0 -> 24.6.1): NO peerDependencies change (covered by existing `^24.6.0`)
 - Minor bump (e.g., 24.5.0 -> 24.6.0): ADD `|| ^24.6.0` to the peerDependencies range
+- Major bump (e.g., 24.43.1 -> 25.0.2): ADD `|| ^25.0.0` to the peerDependencies range
 
 ### 2. `.github/workflows/ci.yml`
 

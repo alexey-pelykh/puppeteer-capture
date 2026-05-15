@@ -1,7 +1,7 @@
 # Bump Puppeteer
 
-Discover new puppeteer releases and bump puppeteer-capture to track them. Each new minor gets its own
-commit, PR, merge, and npm release before proceeding to the next.
+Discover new puppeteer releases and bump puppeteer-capture to track them. Each new (major, minor)
+gets its own commit, PR, merge, and npm release before proceeding to the next.
 
 ## Arguments
 
@@ -17,20 +17,21 @@ automatically.
    ```
    npm view puppeteer versions --json
    ```
-3. Filter to versions newer than current, same major
-4. Group by minor version; for each minor, pick the **latest patch**
-5. Order the resulting list by minor ascending
+3. Filter to versions newer than current (across all majors)
+4. Group by (major, minor); for each combo, pick the **latest patch**
+5. Order ascending by major, then by minor — pending minors of the current major exhaust before
+   crossing into the next major. Never skip intermediates.
 
 **If argument was provided**: validate it exists on npm and use only that version.
 
 Present the bump plan and ask for confirmation:
 
 ```
-Current: 24.39.1
+Current: 24.43.1
 
 Pending bumps (one commit + release each):
-  1. 24.40.x -> 24.40.2  (minor bump)
-  2. 24.41.x -> 24.41.0  (minor bump)
+  1. 24.44.x -> 24.44.0  (minor bump)
+  2. 25.0.x  -> 25.0.2   (major bump)
 
 Proceed?
 ```
@@ -63,8 +64,9 @@ All changes go into a single atomic commit.
 ```
 
 **peerDependencies** (`puppeteer-core` field) -- depends on bump type:
-- **Minor bump** (minor number differs from current): append ` || ^{MAJOR}.{NEW_MINOR}.0`
-- **Patch bump** (same minor, higher patch): no change (existing `^{MAJOR}.{MINOR}.0` covers it)
+- **Major bump** (major number differs from current): append ` || ^{NEW_MAJOR}.{NEW_MINOR}.0`
+- **Minor bump** (same major, higher minor): append ` || ^{MAJOR}.{NEW_MINOR}.0`
+- **Patch bump** (same major+minor, higher patch): no change (existing `^{MAJOR}.{MINOR}.0` covers it)
 
 #### `.github/workflows/ci.yml`
 
@@ -105,7 +107,7 @@ Create PR with `gh pr create`:
   ```
   ## Summary
   * Bump puppeteer and puppeteer-core from {OLD_VERSION} to {VERSION}
-  * [If minor bump] Add `^{MAJOR}.{NEW_MINOR}.0` to peerDependencies range
+  * [If minor or major bump] Add `^{MAJOR}.{NEW_MINOR}.0` to peerDependencies range
   * Add {VERSION} to CI integration test matrix
 
   ## Test plan
@@ -157,7 +159,7 @@ Wait for it to complete successfully. If it fails, diagnose and fix before proce
 
 ### Step 2.8: Next version
 
-If more versions remain in the plan, return to **Step 2.1** for the next minor.
+If more versions remain in the plan, return to **Step 2.1** for the next (major, minor).
 
 Clean up the local branch:
 ```bash
@@ -166,13 +168,14 @@ git branch -d imp/puppeteer-v{VERSION}
 
 ## Rules
 
-- **One minor at a time**: never skip intermediate minors (24.39 -> 24.41 MUST go through 24.40)
-- **Latest patch per minor**: when bumping to a new minor, use the latest available patch
+- **One (major, minor) at a time**: never skip intermediates (24.39 -> 24.41 MUST go through 24.40; 24.43 -> 25.1 MUST go through 25.0)
+- **Minors before majors**: exhaust pending minors of the current major before crossing into the next major
+- **Latest patch per (major, minor)**: when bumping to a new (major, minor), use the latest available patch
 - **4 files, 1 commit**: package.json, package-lock.json, ci.yml, publish.yml -- always all four
 - **Commit message**: `(imp) puppeteer v{VERSION}` -- no issue numbers, no other decoration
 - **Package version**: `package.json` `version` stays `0.0.0` -- npm version comes from the Git tag
 - **Release tag format**: semver with minor increment (e.g., `1.46.0`), never patch or major
-- **peerDeps only on minor bumps**: patch bumps within an already-covered minor don't touch peerDeps
+- **peerDeps on minor or major bumps**: patch bumps within an already-covered (major, minor) don't touch peerDeps
 
 ## Resume
 

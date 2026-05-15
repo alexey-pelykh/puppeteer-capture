@@ -12,4 +12,4 @@ See [puppeteer-bump-pattern.md](puppeteer-bump-pattern.md) for the detailed chec
 
 ## Feedback
 
-See [feedback-puppeteer-bump-one-at-a-time.md](feedback-puppeteer-bump-one-at-a-time.md) — one minor version per commit+release, never skip minors
+See [feedback-puppeteer-bump-one-at-a-time.md](feedback-puppeteer-bump-one-at-a-time.md) — one (major, minor) per commit+release, never skip; exhaust current-major minors before crossing majors
