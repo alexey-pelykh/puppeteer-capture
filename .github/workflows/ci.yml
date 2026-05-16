@@ -30,7 +30,7 @@ jobs:
           - lts/jod
 
     env:
-      PUPPETEER_VERSION: 24.43.1
+      PUPPETEER_VERSION: 25.0.2
 
     steps:
 
@@ -149,6 +149,7 @@ jobs:
           - '24.42.0'
           - '24.43.0'
           - '24.43.1'
+          - '25.0.2'
 
     steps:
 
