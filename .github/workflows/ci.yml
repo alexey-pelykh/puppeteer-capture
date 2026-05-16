@@ -27,7 +27,6 @@ jobs:
           - ubuntu-24.04
           - windows-2022
         node-version:
-          - lts/iron
           - lts/jod
 
     env:
