@@ -7,7 +7,7 @@
 puppeteer-capture uses Chrome's `HeadlessExperimental` CDP domain to capture web pages as video in a deterministic way. Unlike screencast approaches, this produces frame-perfect, reproducible output.
 
 **License**: MIT
-**Node.js**: >=20.18
+**Node.js**: >=22.12
 
 ## Architecture
 
