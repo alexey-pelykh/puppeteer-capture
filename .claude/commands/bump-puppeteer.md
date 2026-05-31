@@ -71,7 +71,12 @@ All changes go into a single atomic commit.
 #### `.github/workflows/ci.yml`
 
 1. Update `PUPPETEER_VERSION` env var (in the `build` job) to `{VERSION}`
-2. Append `- '{VERSION}'` to the `puppeteer-version` matrix list (at the end)
+2. Add `{VERSION}` to the `puppeteer-version` integration matrix — keep **one entry per
+   (major, minor)**:
+   - **New (major, minor)** (minor or major bump): append `- '{VERSION}'` at the end
+   - **Patch bump** (the `{MAJOR}.{MINOR}` is already in the matrix): **replace** that existing
+     entry with `- '{VERSION}'` — never leave two patches of the same minor (e.g. `24.6.0` *and*
+     `24.6.1`)
 
 #### `.github/workflows/publish.yml`
 
@@ -124,9 +129,11 @@ gh pr checks {PR_NUMBER} --watch
 
 If CI fails: diagnose, fix on the branch, push, and re-watch.
 
-Once green, merge:
+Once green, merge. This repo is **rebase-only** (`--merge` and `--squash` are disabled), and
+branch protection still lists stale `build (… lts/iron)` required checks that no longer run, so
+the merge needs an admin bypass:
 ```bash
-gh pr merge {PR_NUMBER} --merge
+gh pr merge {PR_NUMBER} --rebase --admin
 ```
 
 ### Step 2.6: Create GitHub Release
@@ -171,6 +178,7 @@ git branch -d imp/puppeteer-v{VERSION}
 - **One (major, minor) at a time**: never skip intermediates (24.39 -> 24.41 MUST go through 24.40; 24.43 -> 25.1 MUST go through 25.0)
 - **Minors before majors**: exhaust pending minors of the current major before crossing into the next major
 - **Latest patch per (major, minor)**: when bumping to a new (major, minor), use the latest available patch
+- **One matrix entry per (major, minor)**: in `ci.yml`, a patch bump **replaces** the existing same-minor entry; only a new (major, minor) appends. Never two patches of one minor.
 - **4 files, 1 commit**: package.json, package-lock.json, ci.yml, publish.yml -- always all four
 - **Commit message**: `(imp) puppeteer v{VERSION}` -- no issue numbers, no other decoration
 - **Package version**: `package.json` `version` stays `0.0.0` -- npm version comes from the Git tag

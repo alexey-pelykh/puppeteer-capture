@@ -98,7 +98,8 @@ Do **not** add issue numbers to commit messages. Use `Closes #N` in PR body inst
 - Node: LTS iron, LTS jod
 
 **Integration tests** (CI):
-- Puppeteer versions: 24.3.0, 24.3.1, 24.4.0, 24.5.0, 24.6.0, 24.6.1
+- Puppeteer versions: latest patch of each supported (major, minor), 24.3 → 25.1, on Ubuntu + Windows (one entry per minor)
+- Browser provisioning: `npm install --no-save puppeteer@<v>` provisions both `chrome` and `chrome-headless-shell` natively at the version's pinned build; no per-version browser cache (it restored a stale folder that made the installer no-op)
 - Run after build job passes
 
 ## Release Process
@@ -151,7 +152,7 @@ Exhaust all pending minors of the current major before crossing into the next ma
 ### 2. `.github/workflows/ci.yml`
 
 - Update `PUPPETEER_VERSION` env var (build job) to new version
-- Append new version to the `puppeteer-version` integration test matrix
+- Add the new version to the `puppeteer-version` integration matrix, keeping **one entry per (major, minor)**: append for a new (major, minor); for a patch bump, **replace** the existing same-minor entry (never two patches of one minor, e.g. `24.6.0` and `24.6.1`)
 
 ### 3. `.github/workflows/publish.yml`
 
