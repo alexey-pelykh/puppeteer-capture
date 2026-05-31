@@ -97,25 +97,15 @@ jobs:
           - ubuntu-24.04
           - windows-2022
         puppeteer-version:
-          - '24.3.0'
           - '24.3.1'
           - '24.4.0'
           - '24.5.0'
-          - '24.6.0'
           - '24.6.1'
-          - '24.7.0'
-          - '24.7.1'
           - '24.7.2'
-          - '24.8.1'
           - '24.8.2'
           - '24.9.0'
-          - '24.10.0'
-          - '24.10.1'
           - '24.10.2'
-          - '24.11.0'
-          - '24.11.1'
           - '24.11.2'
-          - '24.12.0'
           - '24.12.1'
           - '24.13.0'
           - '24.14.0'
@@ -147,9 +137,7 @@ jobs:
           - '24.40.0'
           - '24.41.0'
           - '24.42.0'
-          - '24.43.0'
           - '24.43.1'
-          - '25.0.2'
           - '25.0.4'
           - '25.1.0'
 
@@ -177,17 +165,6 @@ jobs:
           path: ${{ steps.get-npm-cache.outputs.npm_config_cache }}
           key: npm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-${{ runner.arch }}
-
-      - name: Get Puppeteer cache path
-        id: pptr-cache
-        shell: bash
-        run: echo "path=$(node -e "console.log(require('path').join(require('os').homedir(), '.cache', 'puppeteer'))")" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Puppeteer
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ${{ steps.pptr-cache.outputs.path }}
-          key: puppeteer-${{ runner.os }}-${{ runner.arch }}-${{ matrix.puppeteer-version }}
 
       - name: Install dependencies
         run: npm ci
