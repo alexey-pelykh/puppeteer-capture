@@ -99,7 +99,7 @@ Do **not** add issue numbers to commit messages. Use `Closes #N` in PR body inst
 
 **Integration tests** (CI):
 - Puppeteer versions: latest patch of each supported (major, minor), 24.3 → 25.1, on Ubuntu + Windows (one entry per minor)
-- Browser provisioning: `npm install --no-save puppeteer@<v>` provisions both `chrome` and `chrome-headless-shell` natively at the version's pinned build; no per-version browser cache (it restored a stale folder that made the installer no-op)
+- Browser provisioning: the `npm install --no-save puppeteer@<v>` swap runs with `PUPPETEER_SKIP_DOWNLOAD=true` — its 24.x postinstall otherwise leaves a partial cache folder for `<v>`'s pinned build that blocks re-download (`@puppeteer/browsers` has no `--force`). Browsers are then provisioned via `npx @puppeteer/browsers@latest install chrome@<build>` + `chrome-headless-shell@<build>` at `<v>`'s pinned build: puppeteer 24.x's own bundled `@puppeteer/browsers` (2.13.2) downloads but silently fails to extract Chrome on the runners (exit 0, no executable), whereas the current 3.x extracts correctly (it is what the 25.x base uses). A verification step fails the job if the executables are missing. No per-version browser cache.
 - Run after build job passes
 
 ## Release Process

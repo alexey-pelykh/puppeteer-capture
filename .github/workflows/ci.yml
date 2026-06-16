@@ -169,8 +169,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Skip the postinstall browser download: on a swap over the base install, the
+      # 24.x postinstall leaves an empty cache folder for the pinned build, and
+      # @puppeteer/browsers then refuses to re-download into it (no --force). Skip it
+      # here and provision the browsers explicitly in the next step instead.
       - name: Install Puppeteer ${{ matrix.puppeteer-version }}
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
         run: npm install --no-save 'puppeteer@${{ matrix.puppeteer-version }}' 'puppeteer-core@${{ matrix.puppeteer-version }}'
+
+      # Provision the browsers for the swapped-in version at its pinned build.
+      # puppeteer 24.x bundles @puppeteer/browsers 2.13.2, which downloads but
+      # silently fails to extract Chrome on the runners (exit 0, no executable);
+      # the current @puppeteer/browsers (what the 25.x base uses) extracts fine, so
+      # provision through it directly. The final node step fails the job loudly if
+      # the executables the tests need are not actually present.
+      - name: Provision browsers for ${{ matrix.puppeteer-version }}
+        shell: bash
+        run: |
+          set -e
+          build="$(node -p "require('puppeteer-core').PUPPETEER_REVISIONS.chrome")"
+          cache="$(node -p "require('path').join(require('os').homedir(),'.cache','puppeteer')")"
+          npx --yes @puppeteer/browsers@latest install "chrome@$build" --path "$cache"
+          npx --yes @puppeteer/browsers@latest install "chrome-headless-shell@$build" --path "$cache"
+          node -e "(async()=>{const p=require('puppeteer'),fs=require('fs');let ok=true;for(const [n,f] of [['chrome',()=>p.executablePath()],['chrome-headless-shell',()=>p.executablePath({headless:'shell'})]]){const x=await Promise.resolve(f());const e=fs.existsSync(x);console.log((e?'OK  ':'MISS'),n,x);ok=ok&&e}if(!ok){console.error('::error::browser provisioning failed for puppeteer '+require('puppeteer/package.json').version);process.exit(1)}})().catch((e)=>{console.error('::error::'+e);process.exit(1)})"
 
       - name: Verify the Puppeteer and Puppeteer-Core versions
         run: |
