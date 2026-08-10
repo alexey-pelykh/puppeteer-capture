@@ -1,6 +1,8 @@
 ## Project-specific:
 /lib
 /output.mp4
+/.tmp/
+/.claude/scheduled_tasks.lock
 
 ## Origin: https://github.com/github/gitignore/blob/main/Node.gitignore
 # Logs
