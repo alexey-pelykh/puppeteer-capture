@@ -12,6 +12,10 @@ See [bump-puppeteer-merge-mechanics.md](bump-puppeteer-merge-mechanics.md) — m
 - `.github/workflows/ci.yml` — `PUPPETEER_VERSION` env + integration test matrix
 - `.github/workflows/publish.yml` — `PUPPETEER_VERSION` env
 
+## Dependabot Triage
+
+See [dependabot-triage-stale-base.md](dependabot-triage-stale-base.md) — red CI on a Dependabot PR is often a stale branch-point (pre CI-fix), not the bump; check merge-base + rebase before assuming a real break.
+
 ## Feedback
 
 See [feedback-puppeteer-bump-one-at-a-time.md](feedback-puppeteer-bump-one-at-a-time.md) — one (major, minor) per commit+release, never skip; exhaust current-major minors before crossing majors
