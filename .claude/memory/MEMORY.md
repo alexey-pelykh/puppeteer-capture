@@ -1,21 +1,7 @@
 # puppeteer-capture Memory
 
-## Puppeteer Version Bump Pattern
+The puppeteer bump procedure itself lives in the repo: CLAUDE.md § Puppeteer Version Bump Procedure and the `/bump-puppeteer` skill. Memory holds only what those do not say.
 
-See [puppeteer-bump-pattern.md](puppeteer-bump-pattern.md) for the detailed checklist used when a new puppeteer version is released.
-
-See [bump-puppeteer-merge-mechanics.md](bump-puppeteer-merge-mechanics.md) — merge with `gh pr merge --rebase --admin` (NOT `--merge`); 24.x integration regression (#252) = 24.x's bundled `@puppeteer/browsers@2.13.2` failing to extract Chrome on the CI runners, fixed in PR #253.
-
-## Key Files
-
-- `package.json` — devDeps pin exact versions; peerDeps use `^major.minor.0` ranges
-- `.github/workflows/ci.yml` — `PUPPETEER_VERSION` env + integration test matrix
-- `.github/workflows/publish.yml` — `PUPPETEER_VERSION` env
-
-## Dependabot Triage
-
-See [dependabot-triage-stale-base.md](dependabot-triage-stale-base.md) — red CI on a Dependabot PR is often a stale branch-point (pre CI-fix), not the bump; check merge-base + rebase before assuming a real break.
-
-## Feedback
-
-See [feedback-puppeteer-bump-one-at-a-time.md](feedback-puppeteer-bump-one-at-a-time.md) — one (major, minor) per commit+release, never skip; exhaust current-major minors before crossing majors
+- [Merge mechanics](bump-puppeteer-merge-mechanics.md) — every merge is `gh pr merge --rebase --admin`; BLOCKED means the phantom `lts/iron` required checks; the integration matrix is not required
+- [One (major, minor) at a time](feedback-puppeteer-bump-one-at-a-time.md) — one combo per commit+release, never skip; exhaust current-major minors before crossing majors
+- [Dependabot triage](dependabot-triage-stale-base.md) — red CI is often a stale branch-point, not the bump; a lockfile PR that conflicts after a merge is superseded by a fresh PR, not rebased; #266 (TypeScript 7) is blocked by ts-jest's peer range
