@@ -95,10 +95,10 @@ Do **not** add issue numbers to commit messages. Use `Closes #N` in PR body inst
 
 **CI matrix**:
 - OS: Ubuntu 24.04, Windows 2022
-- Node: LTS iron, LTS jod
+- Node: LTS jod
 
 **Integration tests** (CI):
-- Puppeteer versions: latest patch of each supported (major, minor), 24.3 → 25.1, on Ubuntu + Windows (one entry per minor)
+- Puppeteer versions: latest patch of each supported (major, minor), from 24.3 up to the current pin (`PUPPETEER_VERSION`), on Ubuntu + Windows (one entry per minor)
 - Browser provisioning: the `npm install --no-save puppeteer@<v>` swap runs with `PUPPETEER_SKIP_DOWNLOAD=true` — its 24.x postinstall otherwise leaves a partial cache folder for `<v>`'s pinned build that blocks re-download (`@puppeteer/browsers` has no `--force`). Browsers are then provisioned via `npx @puppeteer/browsers@latest install chrome@<build>` + `chrome-headless-shell@<build>` at `<v>`'s pinned build: puppeteer 24.x's own bundled `@puppeteer/browsers` (2.13.2) downloads but silently fails to extract Chrome on the runners (exit 0, no executable), whereas the current 3.x extracts correctly (it is what the 25.x base uses). A verification step fails the job if the executables are missing. No per-version browser cache.
 - Run after build job passes
 
@@ -144,7 +144,7 @@ Exhaust all pending minors of the current major before crossing into the next ma
 ### 1. `package.json`
 
 - **`devDependencies`**: Pin both `puppeteer` and `puppeteer-core` to exact new version (no caret)
-- **`peerDependencies`**: Append `|| ^{major}.{minor}.0` on **minor or major bumps**
+- **`peerDependencies`**: Append `|| ^{major}.{minor}.0` to the `puppeteer-core` entry (the only peer dependency) on **minor or major bumps**
   - Patch bump (e.g. 24.6.0 → 24.6.1): no peerDeps change (existing `^24.6.0` covers it)
   - Minor bump (e.g. 24.5.0 → 24.6.0): add `|| ^24.6.0`
   - Major bump (e.g. 24.43.1 → 25.0.2): add `|| ^25.0.0`
