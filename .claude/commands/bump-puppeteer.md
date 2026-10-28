@@ -127,11 +127,33 @@ Wait for CI:
 gh pr checks {PR_NUMBER} --watch
 ```
 
+The `integration` cells (`needs: build`, one per OS × `puppeteer-version` entry) register as checks
+only after the build passes. A watch that stops once nothing is pending can stop before they exist
+and report green with only the build and pages checks run. Before merging, count them:
+```bash
+gh pr checks {PR_NUMBER} --json name,bucket --jq '
+  [.[] | select(.name | startswith("integration ("))]
+  | {total: length, pass: map(select(.bucket == "pass")) | length}'
+```
+
+HARD GATE: merge only when `total` and `pass` both equal the number of `os` entries times the number
+of `puppeteer-version` entries in the `integration` matrix of `.github/workflows/ci.yml`. If either
+is lower, re-run the watch until the cells appear and finish. This assumes the integration check
+names start with `integration (` and the matrix is `os` × `puppeteer-version` only.
+
 If CI fails: diagnose, fix on the branch, push, and re-watch.
 
-Once green, merge. This repo is **rebase-only** (`--merge` and `--squash` are disabled), and
-branch protection still lists stale `build (… lts/iron)` required checks that no longer run, so
-the merge needs an admin bypass:
+Exception: an `integration` cell cancelled at the job timeout while in the step "Cache npm packages"
+is re-run first, not fixed on the branch. Its annotation starts with
+`The job has exceeded the maximum execution time`. Find the run and re-run only the failed jobs:
+```bash
+gh run list --branch imp/puppeteer-v{VERSION} --workflow=ci.yml --limit 1
+gh run rerun {RUN_ID} --failed
+```
+
+Once green and the gate passes, merge. This repo is **rebase-only** (`--merge` and `--squash` are
+disabled), and branch protection still lists stale `build (… lts/iron)` required checks that no
+longer run, so the merge needs an admin bypass:
 ```bash
 gh pr merge {PR_NUMBER} --rebase --admin
 ```
@@ -163,6 +185,15 @@ gh run watch {RUN_ID}
 ```
 
 Wait for it to complete successfully. If it fails, diagnose and fix before proceeding.
+
+After the run succeeds, npm can take several minutes to list the new version. Poll the registry,
+bypassing npm's local cache, until it prints `{NEW_TAG}`:
+```bash
+npm view puppeteer-capture@{NEW_TAG} version --prefer-online
+```
+
+Call the publish missing only if the check still returns nothing after repeated tries over several
+minutes.
 
 ### Step 2.8: Next version
 
