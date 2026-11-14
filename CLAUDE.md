@@ -118,11 +118,12 @@ Do **not** add issue numbers to commit messages. Use `Closes #N` in PR body inst
 ```
 
 **Publishing**: Uses OIDC trusted publishing (no `NPM_TOKEN`). The `npm-publish` GitHub environment
-provides deployment protection. Provenance attestation links the published package to its source commit.
+deploys only from tags matching `[0-9]*.[0-9]*.[0-9]*`, with no required reviewers. Provenance attestation
+links the published package to its source commit.
 
 **Required secrets**: `CODECOV_TOKEN`
 
-**Required environments**: `npm-publish` (with deployment protection rules)
+**Required environments**: `npm-publish` (deployment tag policy `[0-9]*.[0-9]*.[0-9]*`)
 
 ## Platform Constraints
 
